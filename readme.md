@@ -5,12 +5,15 @@ See https://github.com/BatGen/batGen/wiki for more information.
 1.0.0-RC1 Initial Release Candidate
 
 
-HOW TO USE:
+##HOW TO USE:
+```
     //takes 2 parameters, location of source files, and package location
     CodeGen codeGen = new CodeGen( "src/test/resources", "org.batgen.sample" );
     codeGen.run();
+```
 
 EXAMPLE SOURCE FILE: (employee.txt)
+```
     [Settings]
     PACKAGE org.batgen.sample
     CLASS       Employee
@@ -24,6 +27,7 @@ EXAMPLE SOURCE FILE: (employee.txt)
     STRING(132)    firstName     // First Name
     
     LONG(10)    supervisorKey   SUPERVISOR_KEY?
+```
 
 SPECIAL SYMBOLS:
     * the field is required
