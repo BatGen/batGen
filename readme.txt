@@ -1,6 +1,6 @@
 BatGen - A simple yet powerful code generator for MyBatis.
 
-See https://github.com/simoncomputing/batgen.wiki.git for more information.
+See https://github.com/BatGen/batGen/wiki for more information.
 
 1.0.0-RC1 Initial Release Candidate
 
