@@ -84,7 +84,11 @@ public class DomainGenerator extends Generator {
     }
 
     private void writeComment() {
-        sb.append( comment );
+        if (comment == null){
+            sb.append( "" );
+        }
+        else
+            sb.append( comment );
     }
 
     private void writePackage() {
