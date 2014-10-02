@@ -21,7 +21,7 @@
     </licenses>
 
     <scm>
-        <url>git@github.com:simoncomputing/batgen.git</url>
+        <url>git@github.com:BatGen/batGen.git</url>
     </scm>
 
     <dependencies>
