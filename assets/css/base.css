@@ -1,0 +1,72 @@
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+.footermenu li {
+    display: inline-block;
+}
+.jumbotron {
+    background-image: url(../../assets/images/splash.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    color: #eee;
+}
+h1, h2, h3, h4 {
+    color: #E22A35;
+}
+
+a {
+    color: #C56F20;
+}
+
+a:hover, a:focus {
+    color: #EE8C32;
+}
+
+.splash {
+    padding-bottom: 50px;
+}
+.my-btn {
+    background-image: -webkit-linear-gradient(top,#CA6E42 0,#A22D40 100%);
+    background-image: linear-gradient(to bottom,#CA6E42 0,#A22D40 100%);
+    background-repeat: repeat-x;
+    border-color: #68331F;
+    color: #F8EDD9;
+    background-color: #CA6342;
+}
+
+.my-btn:hover, .my-btn:focus {
+    background-image: -webkit-linear-gradient(top,#BD643A 0,#942638 100%);
+    background-image: linear-gradient(to bottom,#BD643A 0,#942638 100%);
+    background-repeat: repeat-x;
+    border-color: #68331F;
+    color: #FFFFFF;
+    background-color: #CA6342;
+}
+#batgen-logo{
+    background-image: url(../../assets/images/batgen_shiny.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 290px;
+}
+#batgen-logo-watermark{
+    background-image: url(../../assets/images/batgen_watermark_red.png);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    margin-top: -141px;
+    margin-left: 40px;
+    height: 141px;
+}
+#footer {
+    clear: both;
+    position: relative;
+    z-index: 10;
+    height: 3em;
+    margin-top: -3em;
+}
+html, body {
+    height: 100%;
+    padding-bottom: 3em;
+}

@@ -1,39 +1,40 @@
-BatGen - A simple yet powerful code generator for MyBatis.
+# Jekyll-Bootstrap
 
-See https://github.com/BatGen/batGen/wiki for more information.
+The quickest way to start and publish your Jekyll powered blog. 100% compatible with GitHub pages
 
-1.0.0-RC1 Initial Release Candidate
+## Usage
+
+For all usage and documentation please see: <http://jekyllbootstrap.com>
+
+## Version
+
+0.3.0 - stable and versioned using [semantic versioning](http://semver.org/).
+
+**NOTE:** 0.3.0 introduces a new theme which is not backwards compatible in the sense it won't _look_ like the old version.
+However, the actual API has not changed at all.
+You might want to run 0.3.0 in a branch to make sure you are ok with the theme design changes.
+
+## Contributing
 
 
-## HOW TO USE:
-```
-    //takes 2 parameters, location of source files, and package location
-    CodeGen codeGen = new CodeGen( "src/test/resources", "org.batgen.sample" );
-    codeGen.run();
-```
+To contribute to the framework please make sure to checkout your branch based on `jb-development`!!
+This is very important as it allows me to accept your pull request without having to publish a public version release.
 
-EXAMPLE SOURCE FILE: (employee.txt)
-```
-    [Settings]
-    PACKAGE org.batgen.sample
-    CLASS       Employee
-    
-    [Fields]
-    
-    LONG(10)        employeeKey     EMPLOYEE_KEY!
-    
-    DOUBLE(10,2)    salary       // Salary of employee
-    STRING(132)    lastName*      // Last Name
-    STRING(132)    firstName     // First Name
-    
-    LONG(10)    supervisorKey   SUPERVISOR_KEY?
-```
+Small, atomic Features, bugs, etc.
+Use the `jb-development` branch but note it will likely change fast as pull requests are accepted.
+Please rebase as often as possible when working.
+Work on small, atomic features/bugs to avoid upstream commits affecting/breaking your development work.
 
-SPECIAL SYMBOLS:
-```
-* the field is required
-- SequenceDisabled
-! the field is a primary key
-? the field is a search Id
-// allow comments to be inserted after
-```
+For Big Features or major API extensions/edits:
+This is the one case where I'll accept pull-requests based off the master branch.
+This allows you to work in isolation but it means I'll have to manually merge your work into the next public release.
+Translation : it might take a bit longer so please be patient! (but sincerely thank you).
+
+**Jekyll-Bootstrap Documentation Website.**
+
+The documentation website at <http://jekyllbootstrap.com> is maintained at https://github.com/plusjade/jekyllbootstrap.com
+
+
+## License
+
+[MIT](http://opensource.org/licenses/MIT)

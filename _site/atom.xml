@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>BatGen</title>
+ <link href="http://username.github.io/" rel="self"/>
+ <link href="http://username.github.io"/>
+ <updated>2014-10-03T08:59:57-04:00</updated>
+ <id>http://username.github.io</id>
+ <author>
+   <name>SimonComputing</name>
+   <email>blah@email.test</email>
+ </author>
+
+ 
+ 
+</feed>

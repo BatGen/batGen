@@ -1,0 +1,92 @@
+---
+layout: index_layout
+---
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <meta name="description" content="">
+                        <meta name="author" content="">
+                            <link rel="icon" href="../../favicon.ico">
+                                
+                                <title>Jumbotron Template for Bootstrap</title>
+                                
+                                <!-- Bootstrap core CSS -->
+                                <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+                                    
+                                    <!-- Custom styles for this template -->
+                                    
+                                        
+                                        <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+                                        <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+                                        <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+                                        
+                                        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                                        <!--[if lt IE 9]>
+                                         <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+                                         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+                                         <![endif]-->
+                                        </head>
+    
+    <body>
+        
+        
+        <!-- Main jumbotron for a primary marketing message or call to action -->
+        <div class="jumbotron">
+            <div class="container text-center splash">
+                <div id="batgen-logo"></div>
+                <h1>BatGen</h1>
+                
+                <p>A simple yet powerful tool for generating SQL, MyBatis files, and the supporting DAO/BO objects <i>all at once.</i></p>
+                <p><a href="../about.html" class="btn my-btn btn-lg" role="button">Learn more &raquo;</a></p>
+                
+            </div>
+        </div>
+        
+        <div class="container">
+            <!-- Example row of columns -->
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>Latest News</h2>
+                    <div style="text-size: 30px">
+                    {% assign posts_collate = site.posts %}
+                    {% include JB/posts_collate %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h2><i><b>Don't</b></i> use if you enjoy:</h2>
+                    <ul>
+                        <li>Typing getters and setters.</li>
+                        <li>Creating dozens of SQL tables.</li>
+                        <li>Constantly coding CRUD commands.</li>
+                        <li>Writing DAO's and BO's over and over again.</li>
+                    </ul>
+                    <h3>Otherwise, try BatGen!</h3>
+                    Just format your variables into a text file to automate these tedious tasks.
+                    
+                    <p><a href="../getstarted.html" >Get started &raquo;</a></p>
+                </div>
+                <div class="col-md-4">
+                    <h2>Open Source</h2>
+                    <p>BatGen is <i>free</i> for use under <a href="http://opensource.org/licenses/MIT">MIT license</a>.</p>
+                    <p>Download BatGen on <a href="https://github.com/BatGen/batGen">GitHub</a> or import BatGen from the Maven Central Repository.</p>
+                    <p><a href="../download.html" class="btn my-btn" role="button">Download &raquo;</a></p>
+                </div>
+            </div>
+            
+        </div> <!-- /container -->
+        
+        
+        <!-- Bootstrap core JavaScript
+         ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="../../dist/js/bootstrap.min.js"></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    </body>
+</html>
+
