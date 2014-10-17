@@ -305,7 +305,8 @@ public class CodeGen {
         }
 
         else {
-            SqlGenerator sql = new SqlGenerator( table, databaseType );
+            //SqlGenerator sql = new SqlGenerator( table, databaseType );
+            SqlGenerator sql = new SqlGenerator( table);
             printPath( sql.createSql() );
         }
 

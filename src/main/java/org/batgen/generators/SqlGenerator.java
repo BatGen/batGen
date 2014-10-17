@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.batgen.BlobColumn;
 import org.batgen.Column;
-import org.batgen.DatabaseType;
+//import org.batgen.DatabaseType;
 import org.batgen.DoubleColumn;
 import org.batgen.LengthColumn;
 import org.batgen.Table;
@@ -41,11 +41,17 @@ public class SqlGenerator extends Generator {
     private String key = "KEY";
     private final int SPACE = 18;
     private String filePath;
-    private DatabaseType databaseType;
+//    private DatabaseType databaseType;
+//
+//    public SqlGenerator( Table table, DatabaseType databaseType ) {
+//        super( table );
+//        this.databaseType = databaseType;
+//
+//        filePath = "sql/" + table.getTableName() + ".sql";
+//    }
 
-    public SqlGenerator( Table table, DatabaseType databaseType ) {
+    public SqlGenerator( Table table ) {
         super( table );
-        this.databaseType = databaseType;
 
         filePath = "sql/" + table.getTableName() + ".sql";
     }
@@ -174,11 +180,10 @@ public class SqlGenerator extends Generator {
         sb.append( ");\n" );
 
         // TODO: This looks questionable...
-
-        if ( databaseType != DatabaseType.ORACLE ) {
-            sb.append( "\ncreate unique index " + table.getTableName()
-                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
-        }
+//        if ( databaseType != DatabaseType.ORACLE ) {
+//            sb.append( "\ncreate unique index " + table.getTableName()
+//                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
+//        }
 
         sb.append( "\ncreate sequence " + table.getTableName() + "_SEQ;\n " );
 
@@ -277,10 +282,11 @@ public class SqlGenerator extends Generator {
 
         sb.append( ");\n" );
 
-        if ( databaseType != DatabaseType.ORACLE ) {
-            sb.append( "\ncreate unique index " + table.getTableName()
-                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
-        }
+        // TODO: This looks questionable...
+//        if ( databaseType != DatabaseType.ORACLE ) {
+//            sb.append( "\ncreate unique index " + table.getTableName()
+//                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
+//        }
 
         sb.append( "\ncreate sequence " + table.getTableName() + "_SEQ;\n " );
 
