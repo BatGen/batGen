@@ -41,12 +41,6 @@ public class DatabaseEnvironment {
     private static final String[] h2Parameters = { "H2", "org.h2.Driver",
             "jdbc:h2:tcp://localhost:9096/sample/testDB", "POOLED", "", "JDBC" };
 
-    private static final String[] jndiParameters = { "JNDI", "", "", "JNDI",
-            "java:/comp/env/jdbc/sample/testDB", "JDBC" };
-
-    private static final String[] mysqlParameters = { "MYSQL",
-            "com.mysql.jdbc.Driver",
-            "jdbc:mysql://localhost:9096/sample/testDB", "POOLED", "", "JDBC" };
 
     private static final String[] oracleParameters = { "ORACLE",
             "oracle.jdbc.OracleDriver",
@@ -91,12 +85,7 @@ public class DatabaseEnvironment {
         if ( "H2".equalsIgnoreCase( environment ) ) {
             temp = h2Parameters;
         }
-        else if ( "JNDI".equalsIgnoreCase( environment ) ) {
-            temp = jndiParameters;
-        }
-        else if ( "MYSQL".equalsIgnoreCase( environment ) ) {
-            temp = mysqlParameters;
-        }
+        
         else if ( "ORACLE".equalsIgnoreCase( environment ) ) {
             temp = oracleParameters;
         }
@@ -113,14 +102,6 @@ public class DatabaseEnvironment {
         }
 
         return new DatabaseEnvironment( dbEnvironment );
-    }
-
-    public static DatabaseEnvironment createMySqlEnvironment() {
-        return new DatabaseEnvironment( mysqlParameters );
-    }
-
-    public static DatabaseEnvironment createJndiEnvironment() {
-        return new DatabaseEnvironment( jndiParameters );
     }
 
     public static DatabaseEnvironment createOracleEnvironment() {
@@ -218,9 +199,8 @@ public class DatabaseEnvironment {
             sb.append( TAB + TAB + TAB + TAB
                     + "<property name=\"url\" value=\"" + this.url + "\" />\n" );
         }
-        if ( this.typeOfDataSource.equals( "JNDI" ) == false ) {
-            sb.append( createLoginInfo() );
-        }
+        
+        sb.append( createLoginInfo() );
         sb.append( TAB + TAB + TAB + "</dataSource>\n" );
         sb.append( TAB + TAB + "</environment>\n" );
 

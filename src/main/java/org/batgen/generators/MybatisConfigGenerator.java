@@ -104,16 +104,14 @@ public class MybatisConfigGenerator {
 
         DatabaseEnvironment samples = DatabaseEnvironment.createH2Environment();
         sb.append( samples.createEnvironment() + "\n" );
-        samples = DatabaseEnvironment
-                .createTestEnvironment( defaultEnvironment );
-        sb.append( samples.createEnvironment() + "\n" );
-        samples = DatabaseEnvironment.createJndiEnvironment();
-        sb.append( samples.createEnvironment() + "\n" );
-        samples = DatabaseEnvironment.createMySqlEnvironment();
-        sb.append( samples.createEnvironment() + "\n" );
+      
         samples = DatabaseEnvironment.createOracleEnvironment();
         sb.append( samples.createEnvironment() + "\n" );
 
+        samples = DatabaseEnvironment
+                .createTestEnvironment( defaultEnvironment );
+        sb.append( samples.createEnvironment() + "\n" );
+        
         sb.append( TAB + "</environments>\n\n" );
 
     }
