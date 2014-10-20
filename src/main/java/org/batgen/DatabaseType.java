@@ -24,7 +24,7 @@
 package org.batgen;
 
 public enum DatabaseType {
-    H2("H2"), ORACLE("ORACLE"), MYSQL("MYSQL");
+    H2("H2"), ORACLE("ORACLE");
 
     private String value;
 

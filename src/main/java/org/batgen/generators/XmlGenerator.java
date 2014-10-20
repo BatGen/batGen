@@ -134,18 +134,10 @@ public class XmlGenerator extends Generator {
                     + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
         }
 
-        if ( databaseType == DatabaseType.MYSQL ) {
-            sb.append( TAB + TAB + "select * from "
-                    + table.getTableName().toLowerCase() + "\n" + TAB + TAB
-                    + "where `" + sqlVariables.get( 0 ) + "` = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
-        }
-        else {
-            sb.append( TAB + TAB + "select * from "
-                    + table.getTableName().toUpperCase() + "\n" + TAB + TAB
-                    + "where " + sqlVariables.get( 0 ) + " = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
-        }
+        sb.append( TAB + TAB + "select * from "
+                + table.getTableName().toUpperCase() + "\n" + TAB + TAB
+                + "where " + sqlVariables.get( 0 ) + " = #{"
+                + javaVariables.get( 0 ) + "}\n" );
 
         sb.append( TAB + "</select>\n" );
 
@@ -159,32 +151,26 @@ public class XmlGenerator extends Generator {
         sb.append( TAB + "<insert id=\"create\" parameterType=\""
                 + table.getPackage() + ".domain." + table.getDomName()
                 + "\">\n" );
-        
-        
+
         //
-        if(!(table.getColumn(0).getFldType().equalsIgnoreCase("string"))){
-            sb.append(TAB+TAB+"<selectKey resultType=\"_"+table.getColumn(0).getFldType().toLowerCase()+"\" keyProperty=\""+table.getColumn(0).getFldName()+"\" order=\"BEFORE\">\n");
-            
-            switch( databaseType ) {
-                case MYSQL:
-                    sb.append( TAB );
-                    sb.append( TAB );
-                    sb.append( TAB );
-                    sb.append(  "select AUTO_INCREMENT FROM information_schema.tables WHERE TABLE_NAME = \"" );
-                    sb.append( table.getTableName().toLowerCase() );
-                    sb.append( "\"\n" );
-                    break;
-                case H2:
-                case ORACLE:
-                    sb.append( TAB );
-                    sb.append( TAB );
-                    sb.append( TAB );
-                    sb.append("select " );
-                    sb.append( table.getTableName().toUpperCase() );
-                    sb.append( "_SEQ.nextval from dual\n" );
+        if ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) ) ) {
+            sb.append( TAB + TAB + "<selectKey resultType=\"_"
+                    + table.getColumn( 0 ).getFldType().toLowerCase()
+                    + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName()
+                    + "\" order=\"BEFORE\">\n" );
+
+            switch (databaseType) {
+            case H2:
+            case ORACLE:
+                sb.append( TAB );
+                sb.append( TAB );
+                sb.append( TAB );
+                sb.append( "select " );
+                sb.append( table.getTableName().toUpperCase() );
+                sb.append( "_SEQ.nextval from dual\n" );
             }
-            
-            sb.append(TAB+TAB+"</selectKey>\n");
+
+            sb.append( TAB + TAB + "</selectKey>\n" );
         }
         //
 
@@ -224,14 +210,6 @@ public class XmlGenerator extends Generator {
             sb.append( TAB );
 
             switch (databaseType) {
-            case MYSQL:
-                sb.append( "where `" );
-                sb.append( column.getColName() );
-                sb.append( "` = #{" );
-                sb.append( column.getFldName() );
-                sb.append( "}\n" );
-                break;
-
             case H2:
             case ORACLE:
                 sb.append( "where " );
@@ -262,10 +240,6 @@ public class XmlGenerator extends Generator {
         sb.append( getCombinedList() + "\n" );
 
         switch (databaseType) {
-        case MYSQL:
-            sb.append( TAB + TAB + "WHERE `" + sqlVariables.get( 0 ) + "` = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
-            break;
         case H2:
         case ORACLE:
             sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
@@ -294,10 +268,6 @@ public class XmlGenerator extends Generator {
                 + table.getTableName().toUpperCase() + "\n" );
 
         switch (databaseType) {
-        case MYSQL:
-            sb.append( TAB + TAB + "where `" + sqlVariables.get( 0 ) + "` = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
-            break;
         case H2:
         case ORACLE:
             sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
@@ -337,9 +307,6 @@ public class XmlGenerator extends Generator {
                 list.append( "\n" + TAB + TAB + TAB );
 
             switch (databaseType) {
-            case MYSQL:
-                list.append( "`" + sqlVariables.get( i ) + "`" );
-                break;
             case H2:
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
@@ -374,9 +341,6 @@ public class XmlGenerator extends Generator {
             StringBuilder list = new StringBuilder();
 
             switch (databaseType) {
-            case MYSQL:
-                list.append( "`" + sqlVariables.get( i ) + "`" );
-                break;
             case H2:
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
