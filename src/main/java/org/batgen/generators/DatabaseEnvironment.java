@@ -50,7 +50,7 @@ public class DatabaseEnvironment {
 
     private static final String[] oracleParameters = { "ORACLE",
             "oracle.jdbc.OracleDriver",
-            "jdbc:oracle:thin:@localhost:9096:sample/testDB", "POOLED", "",
+            "jdbc:oracle:thin:@localhost:1521:xe", "POOLED", "",
             "JDBC" };
 
     /**
