@@ -112,6 +112,8 @@ public class MybatisConfigGenerator {
                 .createTestEnvironment( defaultEnvironment );
         sb.append( samples.createEnvironment() + "\n" );
         
+        sb.append( samples.createJNDIEnvironment() + "\n" );
+        
         sb.append( TAB + "</environments>\n\n" );
 
     }

@@ -206,6 +206,19 @@ public class DatabaseEnvironment {
 
         return sb.toString();
     }
+    
+    public String createJNDIEnvironment(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(TAB + TAB + "<environment id=\"JNDI\">\n");
+        sb.append(TAB + TAB + TAB + "<transactionManager type=\"JDBC\" />\n");
+        sb.append(TAB + TAB + TAB + "<dataSource type=\"JNDI\">\n");
+        sb.append(TAB + TAB + TAB + TAB + "<property name=\"data_source\" value="
+                + "\"java:/comp/env/jdbc/sample/testDB\" />\n");
+        sb.append(TAB + TAB + TAB + "</dataSource>\n");
+        sb.append(TAB + TAB + "</environment>\n");
+        
+        return sb.toString();
+    }
 
     /**
      * This method returns standard initial login information
