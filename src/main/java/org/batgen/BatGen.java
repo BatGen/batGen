@@ -241,6 +241,7 @@ public class BatGen {
 
         for ( String file : files ) {
             table = parser.parse( file );
+            table.setPackage( basePkg );
             generateAll( table );
         }
         

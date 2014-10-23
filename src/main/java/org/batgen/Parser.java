@@ -121,18 +121,13 @@ public class Parser {
      */
     private void parseSettings( Token token ) {
 
-        if ( token.equals( "PACKAGE" ) ) {
-            token = getNextToken();
-            table.setPackage( token.getValue() );
-
-        }
-        else if ( token.equals( "CLASS" ) ) {
+        if ( token.equals( "CLASS" ) ) {
             token = getNextToken();
 
             if ( isNewLine( token ) )
                 throwException( "Expected a class name, recieved new line." );
 
-            setClass( token );
+            setClass( toClassCase(token) );
 
             // check for optional table name
             token = getNextToken();
@@ -142,7 +137,7 @@ public class Parser {
 
         }
         else {
-            throwException( "Unexpected token, expected PACKAGE or CLASS" );
+            throwException( "Unexpected token, expected CLASS" );
 
         }
     }
@@ -423,6 +418,21 @@ public class Parser {
     public static String getPath( String fileName ) {
         int index = fileName.lastIndexOf( File.separatorChar );
         return fileName.substring( 0, index + 1 );
+    }
+
+    /**
+     * this function convert java case so only 1st leter is caps
+     * 
+     * @param value
+     * @return
+     */
+    private Token toClassCase( Token token ) {
+        
+        String line = token.getValue();
+        line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );
+
+        token.setValue( line );
+        return token;
     }
 
     /**
