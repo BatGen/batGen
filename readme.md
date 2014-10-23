@@ -21,19 +21,17 @@ EXAMPLE SOURCE FILE: (employee.txt)
     [Fields]
     
     LONG(10)        employeeKey     EMPLOYEE_KEY!
-    
     DOUBLE(10,2)    salary       // Salary of employee
     STRING(132)    lastName*      // Last Name
     STRING(132)    firstName     // First Name
-    
     LONG(10)    supervisorKey   SUPERVISOR_KEY?
 ```
 
 SPECIAL SYMBOLS:
 ```
-* the field is required
+* the field is required, can not be null
 - SequenceDisabled
 ! the field is a primary key
-? the field is a search Id
+? the field is a search Id, can be used to search for list of objects with this Id
 // allow comments to be inserted after
 ```
