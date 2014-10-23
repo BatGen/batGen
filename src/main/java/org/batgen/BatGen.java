@@ -43,7 +43,7 @@ import org.batgen.generators.XmlGenerator;
  * The app that generates the code. Currently supports H2.
  * 
  */
-public class CodeGen {
+public class BatGen {
 
     private String basePkg;
     private String configPath;
@@ -63,7 +63,7 @@ public class CodeGen {
      *            Base package name.
      * @param databaseType
      */
-    public CodeGen( String configPath, String basePkg, DatabaseType databaseType ) {
+    public BatGen( String configPath, String basePkg, DatabaseType databaseType ) {
         this.configPath = configPath;
         this.basePkg = basePkg;
         this.databaseType = databaseType;
@@ -83,7 +83,7 @@ public class CodeGen {
      * @param basePkg
      *            Base package name.
      */
-    public CodeGen( String path, String pkg ) {
+    public BatGen( String path, String pkg ) {
         this( path, pkg, DatabaseType.H2 );
     }
 
