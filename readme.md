@@ -7,9 +7,9 @@ See https://github.com/BatGen/batGen/wiki for more information.
 
 ## HOW TO USE:
 ```
-    //takes 2 parameters, location of source files, and package location
-    CodeGen codeGen = new CodeGen( "src/test/resources", "org.batgen.sample" );
-    codeGen.run();
+    //takes 3 parameters, location of source files, package location, and database type.
+    BatGen batGen = new BatGen( "src/test/resources", "org.batgen.sample", DatabaseType.H2);
+    batGen.run();
 ```
 
 EXAMPLE SOURCE FILE: (employee.txt)
