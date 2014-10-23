@@ -1,5 +1,5 @@
 /***
- * The MIT License (MIT) 
+F * The MIT License (MIT) 
  * 
  * Copyright (c) 2014 SimonComputing, Inc.
  * 
@@ -31,7 +31,6 @@ import java.util.Scanner;
 import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
-import org.batgen.generators.MySqlGenerator;
 import org.batgen.generators.MybatisConfigGenerator;
 import org.batgen.generators.SessionFactoryGenerator;
 import org.batgen.generators.SqlGenerator;
@@ -244,7 +243,7 @@ public class BatGen {
             table = parser.parse( file );
             generateAll( table );
         }
-
+        
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
 
@@ -299,16 +298,9 @@ public class BatGen {
         DomainGenerator domain = new DomainGenerator( table );
         printPath( domain.createDomain() );
 
-        if ( "MYSQL".equals( databaseType ) ) {
-            MySqlGenerator sql = new MySqlGenerator( table );
-            printPath( sql.createSql() );
-        }
-
-        else {
-            //SqlGenerator sql = new SqlGenerator( table, databaseType );
-            SqlGenerator sql = new SqlGenerator( table);
-            printPath( sql.createSql() );
-        }
+        // SqlGenerator sql = new SqlGenerator( table, databaseType );
+        SqlGenerator sql = new SqlGenerator( table );
+        printPath( sql.createSql() );
 
         TestDaoGenerator testDao = new TestDaoGenerator( table );
         printPath( testDao.createTestDao() );
