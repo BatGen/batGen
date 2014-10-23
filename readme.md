@@ -12,22 +12,8 @@ See http://batgen.github.io/documentation.html for more information.
     batGen.run();
 ```
 
-EXAMPLE SOURCE FILE: (employee.txt)
-```
-    [Settings]
-    PACKAGE org.batgen.sample
-    CLASS       Employee
-    
-    [Fields]
-    
-    LONG(10)        employeeKey     EMPLOYEE_KEY!
-    DOUBLE(10,2)    salary       // Salary of employee
-    STRING(132)    lastName*      // Last Name
-    STRING(132)    firstName     // First Name
-    LONG(10)    supervisorKey   SUPERVISOR_KEY?
-```
-
 The tables used are formatted in an acceptable manner for the application to create the generated files. Your files should end in .txt , should match the below format, and should only contain one table. If your tables are not correctly formatted, an error will occur during the implementation of the code generation application. Each file is broken into three sections:
+
 1. The first section is Comments.
    1. Generally the comment section is used to define what the table name is called.
    2. Comments here can be defined by a multi-line comment (starting with /* and ending with */) or a single line comment (//).
@@ -48,3 +34,17 @@ The tables used are formatted in an acceptable manner for the application to cre
       * ? signifies that the column is a searchable ID, used to get an list of all objects with same the ID.
       * - signifies that the column has it's sequence disabled.
 
+EXAMPLE TABLE FILE: (employee.txt)
+```
+    [Settings]
+    PACKAGE org.batgen.sample
+    CLASS       Employee
+    
+    [Fields]
+    
+    LONG(10)        employeeKey     EMPLOYEE_KEY!
+    DOUBLE(10,2)    salary       // Salary of employee
+    STRING(132)    lastName*      // Last Name
+    STRING(132)    firstName     // First Name
+    LONG(10)    supervisorKey   SUPERVISOR_KEY?
+```
