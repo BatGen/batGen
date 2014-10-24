@@ -238,17 +238,19 @@ public class BatGen {
     private void processFiles( List<String> files ) {
         Parser parser = new Parser();
         Table table = null;
+        List<String> classNames = new ArrayList<String>();
 
         for ( String file : files ) {
             table = parser.parse( file );
             table.setPackage( basePkg );
+            classNames.add( table.getDomName() );
             generateAll( table );
         }
-        
+
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
 
-        MybatisConfigGenerator mcg = new MybatisConfigGenerator( files,
+        MybatisConfigGenerator mcg = new MybatisConfigGenerator( classNames,
                 basePkg, databaseType );
         printPath( mcg.createConfiguration() );
 

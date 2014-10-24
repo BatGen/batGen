@@ -127,7 +127,7 @@ public class Parser {
             if ( isNewLine( token ) )
                 throwException( "Expected a class name, recieved new line." );
 
-            setClass( toClassCase(token) );
+            setClass( toCamelCase(token) );
 
             // check for optional table name
             token = getNextToken();
@@ -426,7 +426,7 @@ public class Parser {
      * @param value
      * @return
      */
-    private Token toClassCase( Token token ) {
+    private Token toCamelCase( Token token ) {
         
         String line = token.getValue();
         line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );

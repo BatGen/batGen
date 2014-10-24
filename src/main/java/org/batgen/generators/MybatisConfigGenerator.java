@@ -40,7 +40,7 @@ public class MybatisConfigGenerator {
     private String packagePath;
     private String fileNameWithPath = "src/main/resources/";
     private String fileType = ".xml";
-    private List<String> files;
+    private List<String> classNames;
 
     private static final String TAB = "    ";
 
@@ -51,18 +51,17 @@ public class MybatisConfigGenerator {
     private String defaultEnvironment;
 
     /**
-     * @param files
-     *            - list of all .txt files in the folder the user specified as
-     *            containing configuration info.
+     * @param classNames
+     *            - list of all class names from the .txt files under settings
      * @param packagePath
      *            - this must be the String result of a "table.getPackagePath()"
      *            call
      */
-    public MybatisConfigGenerator( List<String> files, String packagePath,
+    public MybatisConfigGenerator( List<String> classNames, String packagePath,
             DatabaseType databaseType ) {
 
         this.packagePath = packagePath;
-        this.files = files;
+        this.classNames = classNames;
         this.defaultEnvironment = databaseType.toString();
         fileNameWithPath += packagePath + "/dao/mybatis-config.xml";
         fileNameWithPath = fileNameWithPath.replace( ".", "/" );
@@ -104,57 +103,34 @@ public class MybatisConfigGenerator {
 
         DatabaseEnvironment samples = DatabaseEnvironment.createH2Environment();
         sb.append( samples.createEnvironment() + "\n" );
-      
+
         samples = DatabaseEnvironment.createOracleEnvironment();
         sb.append( samples.createEnvironment() + "\n" );
 
         samples = DatabaseEnvironment
                 .createTestEnvironment( defaultEnvironment );
         sb.append( samples.createEnvironment() + "\n" );
-        
+
         sb.append( samples.createJNDIEnvironment() + "\n" );
-        
+
         sb.append( TAB + "</environments>\n\n" );
 
     }
 
     /**
-     * 
-     * @param files
-     *            - list of all files for which mappers must be generated
      * @return - returns the full set of mappers that this file will contain
      */
     private String createMappers() {
 
         sb.append( TAB + "<mappers>\n" );
 
-        for ( String file : files ) {
-
-            if ( file.contains( ".txt" ) ) {
-                createMapper( file );
-            }
+        for ( String name : classNames ) {
+            sb.append( TAB + TAB + "<mapper resource=\"" + getMapperPath()
+                    + "/dao/" + name + "Dao" + fileType + "\" />\n" );
         }
         sb.append( TAB + "</mappers>\n\n" );
 
         return sb.toString();
-    }
-
-    /**
-     * This method creates an individual mapper entry when given a filepath
-     * 
-     * @param file
-     *            - name of the file that we are generating a mapper for
-     * @param sb
-     *            - stringbuilder - taken in so that we can generate a single
-     *            string quickly
-     */
-    private void createMapper( String file ) {
-
-        File tempFile = new File( file );
-        sb.append( TAB + TAB + "<mapper resource=\"" + getMapperPath()
-                + "/dao/" + stripOffType( tempFile.getName() ) + "Dao"
-                + fileType + "\" />\n" );
-
     }
 
     /**
@@ -230,22 +206,6 @@ public class MybatisConfigGenerator {
         } catch ( FileNotFoundException e ) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     *
-     * @param file
-     *            - file path you want to strip off the file type from
-     * @return - returns the file name, minus its extension E.g.,
-     *         "mybatis-config.xml" will become "mybatis-config"
-     */
-    private String stripOffType( String file ) {
-
-        File tempFile = new File( file );
-        String result = tempFile.getName();
-        result = result.substring( 0, result.length() - 4 );
-        return result;
-
     }
 
 }
