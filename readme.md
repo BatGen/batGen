@@ -18,8 +18,7 @@ The tables used are formatted in an acceptable manner for the application to cre
    1. Generally the comment section is used to define what the table name is called.
    2. Comments here can be defined by a multi-line comment (starting with /* and ending with */) or a single line comment (//).
 2. The second section is Settings.
-   1. The keyword Settings must be surrounded by brackets ( [ ] ). Within the settings it contains the keywords package and class.
-   2. PACKAGE specifies the file package destination (must be the same within all tables).
+   1. The keyword Settings must be surrounded by brackets ( [ ] ). Within the settings it contains the keywords class.
    3. CLASS specifies the name of the table (java) and the database name (sql) (The database name is not required).
 3. The third section is Fields.
    1. The keyword Fields must be surrounded by brackets ( [ ] ).
