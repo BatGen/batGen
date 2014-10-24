@@ -35,8 +35,10 @@ The tables used are formatted in an acceptable manner for the application to cre
 
 EXAMPLE TABLE FILE: (employee.txt)
 ```
+    /**
+    * The Employee Table.
+    */
     [Settings]
-    PACKAGE org.batgen.sample
     CLASS       Employee
     
     [Fields]
