@@ -65,6 +65,7 @@ public class SqlGenerator extends Generator {
         sb.append( createTable() );
         sb.append( messageSample() );
         sb.append( createSample() );
+        sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
 
