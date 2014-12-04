@@ -24,8 +24,9 @@ The tables used are formatted in an acceptable manner for the application to cre
    1. The keyword Fields must be surrounded by brackets ( [ ] ).
    2. The field section contains all the columns related to that table.
    3. The data type is on the left, followed by the name of the column (camelCase), the database alias name (not required),special character (not required), and a comment (not required)
-      * The applicable data types are: long, integer, double, string, blob, date, and boolean.
+      * The applicable data types are: long, integer, double, string, blob, date, timestamp and boolean.
       * If the data type is an long, integer, or string, then you must also specify a precision (total number of digits).
+      * If the data type is an timestamp then you must also specify a precision (precision of the seconds ).
       * If the data type is an double, then you must also specify a precision (total number of digits) and scale (number of digits to the right of the decimal point).
    4. The special characters that are allowed are !, *, ? and -.
       * ! signifies that the column is a primary key to the table. There can only be one primary key and it can only be defined as a LONG(some value) or STRING(some value). If you do not create a key column, one will be automatically generated for you
