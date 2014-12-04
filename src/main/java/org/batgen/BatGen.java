@@ -138,7 +138,7 @@ public class BatGen {
         processFiles( fileList );
 
         appendForeignKeySql( "sql/CreateTables.sql" );
-
+        scan.close();
     }
 
     private void appendForeignKeySql( String fileName ) {
