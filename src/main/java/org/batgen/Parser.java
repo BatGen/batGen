@@ -81,25 +81,20 @@ public class Parser {
 
             if ( isNewLine( token ) ) {
                 // do nothing
-
             }
             else if ( token.isComment() ) {
                 table.setComment( token.getValue() );
-
             }
             else if ( token.equals( "[Settings]" ) ) {
                 fSettings = true;
-
             }
             else if ( token.equals( "[Fields]" ) ) {
                 fSettings = false;
-
             }
             else if ( fSettings ) {
                 parseSettings( token );
                 if ( fStop )
                     return table;
-
             }
             else {
                 parseFields( token );
@@ -124,9 +119,9 @@ public class Parser {
         if ( token.equals( "CLASS" ) ) {
             token = getNextToken();
 
-            if ( isNewLine( token ) )
+            if ( isNewLine( token ) ){
                 throwException( "Expected a class name, recieved new line." );
-
+            }
             setClass( toCamelCase(token) );
 
             // check for optional table name
@@ -176,7 +171,6 @@ public class Parser {
 
         if ( !token.isWord() ) {
             throwException( "Expecting type." );
-
         }
         else {
             parseCommonFields( token );
@@ -190,16 +184,13 @@ public class Parser {
             column = new Column();
             column.setType( FieldType.DATE );
             token = getNextToken();
-
         }
         else if ( token.equals( FieldType.BOOLEAN ) ) {
             LengthColumn lenCol = new LengthColumn();
             lenCol.setType( FieldType.BOOLEAN );
             lenCol.setColLen( "1" );
             token = getNextToken();
-
             column = lenCol;
-
         }
         else if ( token.equals( FieldType.DOUBLE ) ) {
             DoubleColumn doubleColumn = new DoubleColumn();
@@ -220,9 +211,9 @@ public class Parser {
             if ( token.isComma() ) {
                 token = getNextToken();
 
-                if ( !token.isNumeric() )
+                if ( !token.isNumeric() ){
                     throwException( "Expecting precision field." );
-
+                }
                 doubleColumn.setPrecision( token.getValue() );
             }
 
@@ -232,19 +223,15 @@ public class Parser {
 
             column = doubleColumn;
             token = getNextToken();
-
         }
         else if ( token.equals( FieldType.BLOB ) ) {
             column = new BlobColumn();
             column.setType( FieldType.BLOB );
-
             token = getNextToken();
-
         }
         else {
             column = getLengthColumn( token );
             token = getNextToken();
-
         }
 
         parseColumnEnd( column, token );
@@ -257,15 +244,15 @@ public class Parser {
 
         if ( token.equals( FieldType.LONG ) ) {
             column.setType( FieldType.LONG );
-
         }
         else if ( token.equals( FieldType.INTEGER ) ) {
             column.setType( FieldType.INTEGER );
-
         }
         else if ( token.equals( FieldType.STRING ) ) {
             column.setType( FieldType.STRING );
-
+        }
+        else if ( token.equals( FieldType.TIMESTAMP ) ) {
+            column.setType( FieldType.TIMESTAMP );
         }
         else {
             throwException( "Unhandled Type. Expected DOUBLE, STRING, LONG, INTEGER, BLOB, BOOLEAN or DATE" );
@@ -303,36 +290,28 @@ public class Parser {
 
             if ( token.isKey() ) {
                 column.setKey();
-
             }
             else if ( token.isRequired() ) {
                 column.setRequired();
-
             }
             else if ( token.isSequenceDisabled() ) {
                 column.setSequenceDisabled();
-
             }
             else if ( token.isComment() ) {
                 column.setComment( token.getValue() );
-
             }
             else if ( token.isSearchId() ) {
                 column.setSearchId();
-
             }
             else if ( token.isWord() ) {
                 if ( column.getFldName() == null ) {
                     column.setFldName( token.getValue() );
                     column.setColName( camelToCaps( token ) );
-
                 }
                 else {
                     column.setColName( token.getValue() );
-
                 }
             }
-
             token = getNextToken();
         }
 
@@ -342,11 +321,9 @@ public class Parser {
 
         if ( token == null ) {
             return true;
-
         }
         else if ( token.isNewLine() ) {
             return true;
-
         }
 
         return false;
@@ -377,12 +354,10 @@ public class Parser {
 
         if ( token == null ) {
             return null;
-
         }
         else if ( token.isError() ) {
             throwException( "Input contains syntax error" );
         }
-
         return token;
     }
 
