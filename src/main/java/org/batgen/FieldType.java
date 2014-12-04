@@ -14,6 +14,7 @@ public enum FieldType {
 	DATE    ( "DATE",    "Date",    "Date",      "DATE" ),
 	BLOB    ( "BLOB",    "byte[]",  "byte[]",    "BLOB" ),
 	STRING  ( "STRING",  "String",  "String",    "VARCHAR2" );
+	TIMESTAMP ("TIMESTAMP",  "date",  "Date",    "TIMESTAMP");
 	
 	private String name;
 	private String primativeType;
