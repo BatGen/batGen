@@ -128,20 +128,25 @@ public class Generator {
     public static String getProtectedJavaLines( String fn ) {
         StringBuffer sb = new StringBuffer();
 
-        sb.append( TAB );
-
-        sb.append( "// " );
-        sb.append( PROTECTED_CODE );
-        sb.append( " -->" );
+        if ( fn.contains( ".sql" ) ) {
+            sb.append( "\n-- " );
+            sb.append( PROTECTED_CODE );
+            sb.append( " -->" );
+        }
+        else {
+            sb.append( TAB );
+            sb.append( "// " );
+            sb.append( PROTECTED_CODE );
+            sb.append( " -->" );
+        }
 
         List<String> lines = getProtectedLines( fn );
-        if ( lines.isEmpty() ) {
+        if ( lines.isEmpty() && !fn.contains( ".sql" ) ) {
             sb.append( "\n\n}" );
         }
 
         for ( String line : lines ) {
             sb.append( line );
-
         }
 
         return sb.toString();
