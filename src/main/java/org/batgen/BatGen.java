@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.batgen.generators.GenUtil;
-import org.batgen.generators.Generator;
 import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
@@ -51,7 +50,6 @@ public class BatGen {
     private String              configPath;
 
     private DatabaseType        databaseType;
-    private static final String TAB = "    ";
 
     private boolean             allFiles;
     private int                 fileCount;
