@@ -24,24 +24,24 @@
 package org.batgen;
 
 import java.io.*;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A reusable parser class. You can instantiate once and run parse() on multiple
  * files.
  */
 public class Parser {
-    private static HashMap<String, Table> tableMap = new HashMap<String, Table>();
+    private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
+    private static List<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
 
-    private String fileName;
+    private String                        fileName;
 
-    private Table table;
-    private Tokenizer tokenizer;
+    private Table                         table;
+    private Tokenizer                     tokenizer;
 
-    // private boolean parentParse;
-
-    private boolean fStop;
+    private boolean                       fStop;
 
     /**
      * Initialize - initializes all global variables - this function must reset
@@ -60,7 +60,6 @@ public class Parser {
         tokenizer = new Tokenizer( br );
 
         fStop = false;
-        // parentParse = false;
     }
 
     /**
@@ -70,7 +69,8 @@ public class Parser {
      * @return table
      */
     public Table parse( String fileName ) {
-        boolean fSettings = true;
+        boolean classSettings = false;
+        boolean foreignSettings = false;
 
         this.fileName = fileName;
         initialize( fileName );
@@ -78,7 +78,6 @@ public class Parser {
         Token token = getNextToken();
 
         while ( token != null ) {
-
             if ( isNewLine( token ) ) {
                 // do nothing
             }
@@ -86,20 +85,28 @@ public class Parser {
                 table.setComment( token.getValue() );
             }
             else if ( token.equals( "[Settings]" ) ) {
-                fSettings = true;
+                classSettings = true;
+                foreignSettings = false;
             }
             else if ( token.equals( "[Fields]" ) ) {
-                fSettings = false;
+                classSettings = false;
+                foreignSettings = false;
             }
-            else if ( fSettings ) {
+            else if ( token.equals( "[ForeignKeys]" ) ) {
+                foreignSettings = true;
+                classSettings = false;
+            }
+            else if ( classSettings ) {
                 parseSettings( token );
                 if ( fStop )
                     return table;
             }
+            else if ( foreignSettings ) {
+                parseForeignKeys( token );
+            }
             else {
                 parseFields( token );
             }
-
             token = getNextToken();
         }
 
@@ -119,10 +126,10 @@ public class Parser {
         if ( token.equals( "CLASS" ) ) {
             token = getNextToken();
 
-            if ( isNewLine( token ) ){
+            if ( isNewLine( token ) ) {
                 throwException( "Expected a class name, recieved new line." );
             }
-            setClass( toCamelCase(token) );
+            setClass( toCamelCase( token ) );
 
             // check for optional table name
             token = getNextToken();
@@ -133,7 +140,6 @@ public class Parser {
         }
         else {
             throwException( "Unexpected token, expected CLASS" );
-
         }
     }
 
@@ -211,7 +217,7 @@ public class Parser {
             if ( token.isComma() ) {
                 token = getNextToken();
 
-                if ( !token.isNumeric() ){
+                if ( !token.isNumeric() ) {
                     throwException( "Expecting precision field." );
                 }
                 doubleColumn.setPrecision( token.getValue() );
@@ -314,7 +320,17 @@ public class Parser {
             }
             token = getNextToken();
         }
+    }
 
+    private void parseForeignKeys( Token token ) {
+        String thisTable = table.getDomName();
+        String thisField = token.getValue();
+        if ( !getNextToken().getValue().equals( "constrainsTo" ) )
+            throwException( "Expecting keywords 'constrainsTo" );
+
+        String other[] = getNextToken().getValue().split( "\\." );
+        foreignKeyList.add( new ForeignNode( thisTable, thisField, other[0],
+                other[1] ) );
     }
 
     private boolean isNewLine( Token token ) {
@@ -377,7 +393,8 @@ public class Parser {
             Reader reader = new FileReader( file );
             br = new BufferedReader( reader );
 
-        } catch ( FileNotFoundException e ) {
+        }
+        catch ( FileNotFoundException e ) {
             throwException( "File: " + fileName + " not found." );
         }
 
@@ -402,7 +419,7 @@ public class Parser {
      * @return
      */
     private Token toCamelCase( Token token ) {
-        
+
         String line = token.getValue();
         line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );
 
@@ -443,8 +460,14 @@ public class Parser {
     /**
      * @return the tableMap which accumulates all the tables that were parsed.
      */
-    public static Collection<Table> getTableMap() {
-        return tableMap.values();
+    public static HashMap<String, Table> getTableMap() {
+        return tableMap;
     }
 
+    /**
+     * @return the tableMap which accumulates all the tables that were parsed.
+     */
+    public static List<ForeignNode> getForeignKeyList() {
+        return foreignKeyList;
+    }
 }
