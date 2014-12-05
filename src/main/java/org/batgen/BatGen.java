@@ -25,9 +25,12 @@ package org.batgen;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import org.batgen.generators.GenUtil;
+import org.batgen.generators.Generator;
 import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
@@ -44,14 +47,14 @@ import org.batgen.generators.XmlGenerator;
  */
 public class BatGen {
 
-    private String basePkg;
-    private String configPath;
+    private String              basePkg;
+    private String              configPath;
 
-    private DatabaseType databaseType;
+    private DatabaseType        databaseType;
     private static final String TAB = "    ";
 
-    private boolean allFiles;
-    private int fileCount;
+    private boolean             allFiles;
+    private int                 fileCount;
 
     /**
      * Initializes the code generator.
@@ -136,79 +139,7 @@ public class BatGen {
 
         }
         processFiles( fileList );
-
-        appendForeignKeySql( "sql/CreateTables.sql" );
         scan.close();
-    }
-
-    private void appendForeignKeySql( String fileName ) {
-        StringBuilder sb = new StringBuilder();
-        int colCount;
-
-        for ( Table table : Parser.getTableMap() ) {
-            colCount = 0;
-            for ( Column column : table.getColumns() ) {
-                if ( column.getTable() == null )
-                    continue;
-
-                colCount++;
-                if ( databaseType.equals( "ORACLE" ) ) {
-
-                    sb.append( "\n" );
-                    sb.append( TAB );
-                    sb.append( "KEY `key_idx_" );
-                    sb.append( colCount );
-                    sb.append( "` (`" );
-                    sb.append( column.getColName() );
-                    sb.append( "`),\n" );
-
-                    sb.append( TAB );
-                    sb.append( "CONSTRAINT `" );
-                    sb.append( table.getTableName().toLowerCase() );
-                    sb.append( "_fk_" );
-                    sb.append( colCount );
-                    sb.append( "` FOREIGN KEY (`" );
-                    sb.append( column.getColName() );
-                    sb.append( "`) REFERENCES `" );
-                    sb.append( column.getTable().getTableName().toLowerCase() );
-                    sb.append( "` (`KEY`);" );
-                    continue;
-
-                }
-
-                if ( databaseType.equals( "H2" ) ) {
-                    sb.append( "\n" );
-                    sb.append( TAB );
-                    sb.append( "ALTER TABLE " );
-                    sb.append( table.getTableName() );
-                    sb.append( " ADD FOREIGN KEY (" );
-                    sb.append( column.getColName() );
-                    sb.append( ") REFERENCES " );
-                    sb.append( column.getTable().getTableName() );
-                    sb.append( "(" );
-                    sb.append( column.getTable().getColumn( 0 ).getColName()
-                            .toUpperCase() );
-                    sb.append( ");" );
-                    continue;
-                }
-
-                // TODO: default is MySQL?!
-                sb.append( "\n" );
-                sb.append( TAB );
-                sb.append( table.getTableName() );
-                sb.append( "_FK_" );
-                sb.append( colCount );
-                sb.append( " foreign key (" );
-                sb.append( column.getColName() );
-                sb.append( ") references " );
-                sb.append( column.getTable().getTableName() );
-                sb.append( "(" );
-                sb.append( column.getTable().getColumn( 0 ).getColName()
-                        .toUpperCase() );
-                sb.append( ");" );
-
-            }
-        }
     }
 
     /**
@@ -247,6 +178,9 @@ public class BatGen {
             generateAll( table );
         }
 
+        // build foreign keys
+        GenUtil.writeToFile( "sql/AlterTables.sql", createForeignKeys() );
+
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
 
@@ -255,6 +189,7 @@ public class BatGen {
         printPath( mcg.createConfiguration() );
 
         printPath( "sql/CreateTables.sql" );
+        printPath( "sql/AlterTables.sql" );
         printPath( "sql/DropTables.sql" );
 
         System.out.println( "\nDone." );
@@ -311,6 +246,59 @@ public class BatGen {
         TestBoGenerator testBo = new TestBoGenerator( table );
         printPath( testBo.createTestBo() );
 
+    }
+
+    protected String createForeignKeys() {
+        StringBuilder sb = new StringBuilder();
+        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser
+                .getForeignKeyList();
+        HashMap<String, Table> tableMap = Parser.getTableMap();
+        boolean fromFieldExist = false;
+        boolean toFieldExist = false;
+        Table fromTable;
+        Table toTable;
+        String fromField = "";
+        String toField = "";
+
+        for ( ForeignNode node : list ) {
+            fromTable = tableMap.get( node.getFromTable() );
+            toTable = tableMap.get( node.getToTable() );
+            fromFieldExist = false;
+            toFieldExist = false;
+
+            if ( fromTable != null && toTable != null ) {
+                for ( Column col : fromTable.getColumns() ) {
+                    if ( col.getFldName().equals( node.getFromField() ) ) {
+                        fromFieldExist = true;
+                        fromField = col.getColName();
+                        break;
+                    }
+                }
+                for ( Column col : toTable.getColumns() ) {
+                    if ( col.getFldName().equals( node.getToField() ) ) {
+                        toFieldExist = true;
+                        toField = col.getColName();
+                        break;
+                    }
+                }
+
+                if ( fromFieldExist && toFieldExist ) {
+                    sb.append( "ALTER TABLE " + fromTable.getTableName() + "\n" );
+                    sb.append( "ADD FOREIGN KEY (" + fromField + ")\n" );
+                    sb.append( "REFERENCES " + toTable.getTableName() + "("
+                            + toField + ")\n" );
+                    sb.append( "\n" );
+                }
+                else
+                    throw new IllegalArgumentException(
+                            "Either the field names are wrong or don't exist for foreign keys." );
+            }
+            else
+                throw new IllegalArgumentException(
+                        "Either the tables names are wrong or don't exist for foreign keys." );
+        }
+
+        return sb.toString();
     }
 
     private void printPath( String file ) {
