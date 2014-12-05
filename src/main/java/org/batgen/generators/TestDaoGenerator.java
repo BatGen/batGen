@@ -119,12 +119,12 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "@Before\n" );
-        sb.append( "\tpublic void setup() {\n" );
+        sb.append( TAB + "public void setup() {\n" );
         sb.append( TAB + TAB + "SessionFactory.initializeForTest();\n" );
         sb.append( TAB + "}\n" );
 
         sb.append( "\n" + TAB + "@Test\n" );
-        sb.append( "\tpublic void test() throws Exception {\n" );
+        sb.append( TAB + "public void test() throws Exception {\n" );
         sb.append( "\n" + TAB + TAB
                 + "SqlSession session = SessionFactory.getSession();\n" );
         sb.append( TAB + TAB + table.getDomName() + "Dao "
@@ -340,7 +340,7 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "public static int randomNumber() {\n\n" );
-        sb.append( "\t" + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
+        sb.append( TAB + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
         sb.append( TAB + "}\n" );
 
         return sb.toString();
