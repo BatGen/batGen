@@ -307,6 +307,7 @@ public class Tokenizer {
 
             if ( sub.equalsIgnoreCase( "Settings" )
                     || sub.equalsIgnoreCase( "Fields" )
+                    || sub.equalsIgnoreCase( "Indexes" )
                     || sub.equalsIgnoreCase( "ForeignKeys" ) ) {
                 return s;
             }
