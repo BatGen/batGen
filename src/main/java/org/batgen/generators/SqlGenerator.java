@@ -41,14 +41,6 @@ public class SqlGenerator extends Generator {
     private String key = "KEY";
     private final int SPACE = 18;
     private String filePath;
-//    private DatabaseType databaseType;
-//
-//    public SqlGenerator( Table table, DatabaseType databaseType ) {
-//        super( table );
-//        this.databaseType = databaseType;
-//
-//        filePath = "sql/" + table.getTableName() + ".sql";
-//    }
 
     public SqlGenerator( Table table ) {
         super( table );
@@ -86,7 +78,6 @@ public class SqlGenerator extends Generator {
 
     private String writeColumns() {
         StringBuilder sb = new StringBuilder();
-        int fkCount = 0;
         sb.append( "\n" );
 
         for ( Column column : table.getColumns() ) {
@@ -127,21 +118,6 @@ public class SqlGenerator extends Generator {
                 else if ( name.equals( "Column" ) ) {
                     Column c = column;
                     sb.append( c.getSqlType() );
-                    if ( c.getTable() != null ) {
-                        sb.append( " not null" );
-                        fKeys.add( "    constraint "
-                                + table.getTableName()
-                                + "_FK"
-                                + fkCount
-                                + " foreign key ("
-                                + c.getColName()
-                                + ") references "
-                                + c.getTable().getTableName()
-                                + "("
-                                + c.getTable().getColumn( 0 ).getColName()
-                                        .toUpperCase() + ")" );
-                        fkCount++;
-                    }
                 }
 
                 if ( column.isRequired() )
@@ -177,15 +153,7 @@ public class SqlGenerator extends Generator {
                 sb.append( "\n" );
             }
         }
-
         sb.append( ");\n" );
-
-        // TODO: This looks questionable...
-//        if ( databaseType != DatabaseType.ORACLE ) {
-//            sb.append( "\ncreate unique index " + table.getTableName()
-//                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
-//        }
-
         sb.append( "\ncreate sequence " + table.getTableName() + "_SEQ;\n " );
 
         return sb.toString();
@@ -280,25 +248,14 @@ public class SqlGenerator extends Generator {
         else {
             sb.append( "\n" );
         }
-
         sb.append( ");\n" );
-
-        // TODO: This looks questionable...
-//        if ( databaseType != DatabaseType.ORACLE ) {
-//            sb.append( "\ncreate unique index " + table.getTableName()
-//                    + "_PK on " + table.getTableName() + "(" + key + ");\n" );
-//        }
-
         sb.append( "\ncreate sequence " + table.getTableName() + "_SEQ;\n " );
 
         return sb.toString();
-
     }
 
     private void writeDropsFile() {
-
         appendToFile( "sql/DropTables.sql", drop() + "\n\n" );
-
     }
 
     private String drop() {
@@ -317,5 +274,4 @@ public class SqlGenerator extends Generator {
     private String messageSample() {
         return "\n-- Sample Select Statement\n\n";
     }
-
 }
