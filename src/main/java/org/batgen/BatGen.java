@@ -45,7 +45,6 @@ import org.batgen.generators.XmlGenerator;
  * 
  */
 public class BatGen {
-
     private String              basePkg;
     private String              configPath;
 
@@ -234,7 +233,6 @@ public class BatGen {
         DomainGenerator domain = new DomainGenerator( table );
         printPath( domain.createDomain() );
 
-        // SqlGenerator sql = new SqlGenerator( table, databaseType );
         SqlGenerator sql = new SqlGenerator( table );
         printPath( sql.createSql() );
 
@@ -281,11 +279,10 @@ public class BatGen {
                 }
 
                 if ( fromFieldExist && toFieldExist ) {
-                    sb.append( "ALTER TABLE " + fromTable.getTableName() + "\n" );
-                    sb.append( "ADD FOREIGN KEY (" + fromField + ")\n" );
+                    sb.append( "ALTER TABLE " + fromTable.getTableName());
+                    sb.append( " ADD FOREIGN KEY (" + fromField + ") " );
                     sb.append( "REFERENCES " + toTable.getTableName() + "("
-                            + toField + ")\n" );
-                    sb.append( "\n" );
+                            + toField + ");\n" );
                 }
                 else
                     throw new IllegalArgumentException(
