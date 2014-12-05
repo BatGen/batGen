@@ -83,7 +83,7 @@ public class TestBoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "@Before\n" );
-        sb.append( "\tpublic void setup() {\n" );
+        sb.append( TAB + "public void setup() {\n" );
         sb.append( TAB + TAB + "SessionFactory.initializeForTest();\n" );
         sb.append( TAB + "}\n\n" );
 
