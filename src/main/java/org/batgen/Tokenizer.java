@@ -32,16 +32,16 @@ import org.batgen.Token.Type;
 
 public class Tokenizer {
 
-    private String line;
-    private int lineCount, lastPos, pos;
+    private String         line;
+    private int            lineCount, lastPos, pos;
     private BufferedReader bf;
-    private final String SPACE = "\t\f ";
-    private final String SPECIAL = "!*,()-?";
-    private StringBuilder sb = new StringBuilder( "" );
-    private int holdPos;
+    private final String   SPACE    = "\t\f ";
+    private final String   SPECIAL  = "!*,()-?";
+    private StringBuilder  sb       = new StringBuilder( "" );
+    private int            holdPos;
 
     // TODO: Need comment on what the purpose of readNext is...
-    private boolean readNext = true;
+    private boolean        readNext = true;
 
     public Tokenizer( BufferedReader bf ) {
         this.bf = bf;
@@ -150,7 +150,8 @@ public class Tokenizer {
             pos = 0;
             lastPos = 0;
 
-        } catch ( IOException e ) {
+        }
+        catch ( IOException e ) {
             e.printStackTrace();
         }
     }
@@ -305,11 +306,12 @@ public class Tokenizer {
             String sub = s.substring( 1, e );
 
             if ( sub.equalsIgnoreCase( "Settings" )
-                    || sub.equalsIgnoreCase( "Fields" ) ) {
+                    || sub.equalsIgnoreCase( "Fields" )
+                    || sub.equalsIgnoreCase( "ForeignKeys" ) ) {
                 return s;
             }
             else {
-                s = "Error: The brackets must contain only 'Settings' or 'Fields'.";
+                s = "Error: The brackets must contain only 'Settings', 'Fields', or 'ForeignKeys'.";
             }
 
         }
