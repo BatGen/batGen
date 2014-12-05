@@ -29,14 +29,14 @@ import static org.batgen.generators.GenUtil.*;
 
 /**
  * This code generates the Business Objects.
- *
+ * 
  */
 public class BoGenerator extends Generator {
-    String boName = "";
-    StringBuilder sb = new StringBuilder();
-    final String NEWLINE = "\n";
-    Column keyColumn;
-    String filePath;
+    String        boName  = "";
+    StringBuilder sb      = new StringBuilder();
+    final String  NEWLINE = "\n";
+    Column        keyColumn;
+    String        filePath;
 
     public BoGenerator( Table table ) {
         super( table );
@@ -69,13 +69,13 @@ public class BoGenerator extends Generator {
 
         write( "public class " );
         write( boName );
-        write( " { \n" );
+        write( " {\n" );
         write( NEWLINE );
         write( TAB );
         write( "private static " );
         write( boName );
         write( " instance = new " );
-        write( boName + "(); \n" );
+        write( boName + "();\n" );
         write( NEWLINE );
         write( TAB );
         write( "public static " );
@@ -123,13 +123,13 @@ public class BoGenerator extends Generator {
 
     private void writeMethodBody( String type ) {
         String mapperName = table.getDomName() + "Dao";
-        write( TAB + TAB + "SqlSession session = null; \n" );
+        write( TAB + TAB + "SqlSession session = null;\n" );
 
         if ( type.equalsIgnoreCase( "read" ) ) {
-            write( TAB + TAB + table.getDomName() + " result; \n" );
+            write( TAB + TAB + table.getDomName() + " result;\n" );
         }
         else {
-            write( TAB + TAB + "int result = 0; \n" );
+            write( TAB + TAB + "int result = 0;\n" );
         }
 
         write( NEWLINE );
@@ -146,7 +146,7 @@ public class BoGenerator extends Generator {
         write( TAB + TAB + TAB + "throw new BoException( e );\n\n" );
 
         write( TAB + TAB + "} finally { \n" );
-        write( TAB + TAB + TAB + "if ( session != null ) \n" );
+        write( TAB + TAB + TAB + "if ( session != null )\n" );
         write( TAB + TAB + TAB + TAB + "session.close();\n" );
         write( TAB + TAB + "}\n\n" );
         write( TAB + TAB + "return result;\n" );
@@ -171,7 +171,7 @@ public class BoGenerator extends Generator {
                 write( column.getFldType() );
                 write( " key ) throws BoException {\n" );
 
-                write( TAB + TAB + "SqlSession session = null; \n" );
+                write( TAB + TAB + "SqlSession session = null;\n" );
                 write( TAB + TAB + "List<" + table.getDomName() + "> list;\n\n" );
 
                 write( TAB + TAB + "try {\n" );
@@ -192,8 +192,8 @@ public class BoGenerator extends Generator {
                 write( TAB + TAB + TAB + "throw new BoException( e );\n\n" );
 
                 write( TAB + TAB + "} finally { \n" );
-                write( TAB + TAB + TAB + "if ( session != null ) \n" );
-                write( TAB + TAB + TAB + TAB + "session.close(); \n" );
+                write( TAB + TAB + TAB + "if ( session != null )\n" );
+                write( TAB + TAB + TAB + TAB + "session.close();\n" );
                 write( TAB + TAB + "}\n\n" );
                 write( TAB + TAB + "return list;\n" );
                 write( TAB + "}\n\n" );
