@@ -33,6 +33,10 @@ The tables used are formatted in an acceptable manner for the application to cre
       * * signifies that the column is required, and cannot be null.
       * ? signifies that the column is a searchable ID, used to get an list of all objects with same the ID.
       * - signifies that the column has it's sequence disabled.
+4.The Fourth section is Foreign Keys.
+    1.The keyword ForeignKeys must be surrounded by brackets ( [ ] ).
+    2.Use to create references to a column from another table
+    3.Requires three inputs: the column name, the word 'constrainsTo', and the other table name.other column name
 
 EXAMPLE TABLE FILE: (employee.txt)
 ```
@@ -49,4 +53,7 @@ EXAMPLE TABLE FILE: (employee.txt)
     STRING(132)    lastName*      // Last Name
     STRING(132)    firstName     // First Name
     LONG(10)    supervisorKey   SUPERVISOR_KEY?
+    
+    [ForeignKeys]
+    supervisorKey constrainsTo Supervisor.supervisorKey
 ```
