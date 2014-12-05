@@ -33,16 +33,16 @@ import org.batgen.Table;
 import static org.batgen.generators.GenUtil.*;
 
 public class XmlGenerator extends Generator {
-    public static String NEWLINE = "\n";
+    public static String     NEWLINE           = "\n";
 
-    private static final int columnSpace = 45;
-    private List<String> sqlVariables = null;
-    private List<String> javaVariables = null;
-    private List<Column> searchableColumns = null;
+    private static final int columnSpace       = 45;
+    private List<String>     sqlVariables      = null;
+    private List<String>     javaVariables     = null;
+    private List<Column>     searchableColumns = null;
 
-    private String daoName = "";
-    private String filePath;
-    private DatabaseType databaseType;
+    private String           daoName           = "";
+    private String           filePath;
+    private DatabaseType     databaseType;
 
     public XmlGenerator( Table table, DatabaseType databaseType ) {
         super( table );
@@ -67,7 +67,7 @@ public class XmlGenerator extends Generator {
         sb.append( createGetListBy() );
         sb.append( createUpdate() );
         sb.append( createDelete() );
-        sb.append( createProtected() );
+        sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
         return filePath;
@@ -159,7 +159,7 @@ public class XmlGenerator extends Generator {
                     + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName()
                     + "\" order=\"BEFORE\">\n" );
 
-            switch (databaseType) {
+            switch ( databaseType ) {
             case H2:
             case ORACLE:
                 sb.append( TAB );
@@ -209,7 +209,7 @@ public class XmlGenerator extends Generator {
             sb.append( TAB );
             sb.append( TAB );
 
-            switch (databaseType) {
+            switch ( databaseType ) {
             case H2:
             case ORACLE:
                 sb.append( "where " );
@@ -239,7 +239,7 @@ public class XmlGenerator extends Generator {
                 + " set\n" );
         sb.append( getCombinedList() + "\n" );
 
-        switch (databaseType) {
+        switch ( databaseType ) {
         case H2:
         case ORACLE:
             sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
@@ -267,34 +267,13 @@ public class XmlGenerator extends Generator {
         sb.append( TAB + TAB + "delete from "
                 + table.getTableName().toUpperCase() + "\n" );
 
-        switch (databaseType) {
+        switch ( databaseType ) {
         case H2:
         case ORACLE:
             sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
                     + javaVariables.get( 0 ) + "}\n" );
         }
         sb.append( TAB + "</delete>" );
-
-        return sb.toString();
-    }
-
-    private String createProtected() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append( "\n\n\n    <!-- " );
-        sb.append( PROTECTED_CODE );
-        sb.append( " -->\n" );
-
-        List<String> lines = getProtectedLines( filePath );
-
-        // no protected code, close the mapper
-        if ( lines.isEmpty() ) {
-            sb.append( "\n\n</mapper>" );
-        }
-        else {
-            for ( String str : lines )
-                sb.append( str );
-        }
 
         return sb.toString();
     }
@@ -306,7 +285,7 @@ public class XmlGenerator extends Generator {
             if ( i % 5 == 0 && i != 0 )
                 list.append( "\n" + TAB + TAB + TAB );
 
-            switch (databaseType) {
+            switch ( databaseType ) {
             case H2:
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
@@ -340,7 +319,7 @@ public class XmlGenerator extends Generator {
         for ( int i = 0; i < javaVariables.size(); i++ ) {
             StringBuilder list = new StringBuilder();
 
-            switch (databaseType) {
+            switch ( databaseType ) {
             case H2:
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
