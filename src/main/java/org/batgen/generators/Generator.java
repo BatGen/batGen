@@ -34,20 +34,20 @@ import static org.batgen.generators.GenUtil.*;
 /**
  * The base class for all generators. Protected values are provided for
  * sub-classes to ease typing effort.
- *
+ * 
  */
 public class Generator {
-    public static final String PROTECTED_CODE = "PROTECTED CODE";
-    public static final String TAB = "    ";
+    public static final String   PROTECTED_CODE = "PROTECTED CODE";
+    public static final String   TAB            = "    ";
 
-    protected final Table table;
-    protected final String comment;
-    protected final String pkg;
-    protected final String domName;
-    protected final String tableName;
+    protected final Table        table;
+    protected final String       comment;
+    protected final String       pkg;
+    protected final String       domName;
+    protected final String       tableName;
     protected final List<Column> columns;
     protected final List<String> searchList;
-    protected final boolean hasSearch;
+    protected final boolean      hasSearch;
 
     public Generator( Table table ) {
         this.table = table;
@@ -63,7 +63,7 @@ public class Generator {
     /**
      * Use this method to uppercase the first letter of a string i.e.
      * "exampleString" will change to "ExampleString"
-     *
+     * 
      * @param val
      *            String you want to change
      * @return returns the input with the first character in uppercase
@@ -90,14 +90,15 @@ public class Generator {
             fw.write( content );
             fw.close();
 
-        } catch ( IOException e ) {
+        }
+        catch ( IOException e ) {
             e.printStackTrace();
         }
     }
 
     /**
      * checkDir creates the necessary folders to a file if they do not exist
-     *
+     * 
      * @param path
      *            path of the file
      * @return returns whether the file exists or not
@@ -133,6 +134,13 @@ public class Generator {
             sb.append( PROTECTED_CODE );
             sb.append( " -->" );
         }
+
+        else if ( fn.contains( ".xml" ) ) {
+            sb.append( "\n\n\n    <!-- " );
+            sb.append( PROTECTED_CODE );
+            sb.append( " -->" );
+        }
+
         else {
             sb.append( TAB );
             sb.append( "// " );
@@ -151,5 +159,4 @@ public class Generator {
 
         return sb.toString();
     }
-
 }
