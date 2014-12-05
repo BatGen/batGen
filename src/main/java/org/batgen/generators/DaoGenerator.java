@@ -33,13 +33,13 @@ import static org.batgen.generators.GenUtil.*;
  * Generates a basic set of DAO classes.
  */
 public class DaoGenerator extends Generator {
-    private Table table;
-    private String daoName = "";
+    private Table         table;
+    private String        daoName = "";
 
-    private StringBuilder sb = new StringBuilder();
-    private final String TAB = "    ";
-    private Column keyColumn;
-    private String filePath;
+    private StringBuilder sb      = new StringBuilder();
+    private final String  TAB     = "    ";
+    private Column        keyColumn;
+    private String        filePath;
 
     public DaoGenerator( Table table ) {
         super( table );
@@ -113,11 +113,11 @@ public class DaoGenerator extends Generator {
     private void writeInterface() {
         write( "public interface " + daoName + " { \n\n" );
         write( TAB + "public int create( " + table.getDomName() );
-        write( " value ) throws DaoException; \n\n" );
+        write( " value ) throws DaoException;\n\n" );
         write( TAB + "public int update( " + table.getDomName() );
-        write( " value ) throws DaoException; \n\n" );
+        write( " value ) throws DaoException;\n\n" );
         write( TAB + "public int delete( " + keyColumn.getFldType().toString() );
-        write( " key ) throws DaoException; \n\n" );
+        write( " key ) throws DaoException;\n\n" );
         write( TAB + "public " + table.getDomName() + " read( " );
         write( keyColumn.getFldType().toString() );
         write( " key ) throws DaoException;\n\n" );
@@ -132,7 +132,7 @@ public class DaoGenerator extends Generator {
                 write( toTitleCase( column.getFldName() ) );
                 write( "( " );
                 write( column.getFldType() );
-                write( " key ) throws DaoException; \n" );
+                write( " key ) throws DaoException;\n" );
             }
         }
         write( "\n" );
