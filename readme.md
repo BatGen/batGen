@@ -60,7 +60,7 @@ EXAMPLE TABLE FILE: (employee.txt)
     LONG(10)    supervisorKey   SUPERVISOR_KEY?
     
     [Indexes]
-    name     2   lastName   firstName
+    name     lastName, firstName
 
     [ForeignKeys]
     supervisorKey constrainsTo Supervisor.supervisorKey
