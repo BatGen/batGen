@@ -35,6 +35,7 @@ import java.util.List;
 public class Parser {
     private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
     private static List<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
+    private List<String>                  fieldList      = new ArrayList<String>();
 
     private String                        fileName;
 
@@ -70,6 +71,7 @@ public class Parser {
      */
     public Table parse( String fileName ) {
         boolean classSettings = false;
+        boolean indexesSetting = false;
         boolean foreignSettings = false;
 
         this.fileName = fileName;
@@ -87,19 +89,30 @@ public class Parser {
             else if ( token.equals( "[Settings]" ) ) {
                 classSettings = true;
                 foreignSettings = false;
+                indexesSetting = false;
             }
             else if ( token.equals( "[Fields]" ) ) {
                 classSettings = false;
                 foreignSettings = false;
+                indexesSetting = false;
+            }
+            else if ( token.equals( "[Indexes]" ) ) {
+                indexesSetting = true;
+                foreignSettings = false;
+                classSettings = false;
             }
             else if ( token.equals( "[ForeignKeys]" ) ) {
                 foreignSettings = true;
                 classSettings = false;
+                indexesSetting = false;
             }
             else if ( classSettings ) {
                 parseSettings( token );
                 if ( fStop )
                     return table;
+            }
+            else if ( indexesSetting ) {
+                parseIndexes( token );
             }
             else if ( foreignSettings ) {
                 parseForeignKeys( token );
@@ -320,6 +333,40 @@ public class Parser {
             }
             token = getNextToken();
         }
+    }
+
+    private void parseIndexes( Token token ) {
+
+        String indexName = token.getValue();
+        if ( indexName == null ) {
+            throwException( "Expecting a name for the index." );
+        }
+        int num = 0;
+        try {
+            num = Integer.parseInt( getNextToken().getValue() );
+        }
+        catch ( NumberFormatException nfe ) {
+            throwException( "Number does not match number of expected fields." );
+        }
+        fieldList.clear();
+        String fieldName = "";
+        boolean contain = false;
+        for ( int i = 0; i < num; i++ ) {
+            fieldName = getNextToken().getValue();
+            contain = false;
+            for ( Column col : table.getColumns() ) {
+                if ( fieldName.equals( col.getFldName() ) ) {
+                    fieldList.add( col.getColName() );
+                    contain = true;
+                    break;
+                }
+            }
+            if ( !contain ) {
+                throwException( "The fields is not contained in the table." );
+            }
+        }
+        final List<String> list = new ArrayList<String>( fieldList );
+        table.addIndex( new IndexNode( indexName, list ) );
     }
 
     private void parseForeignKeys( Token token ) {
