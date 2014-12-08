@@ -33,7 +33,12 @@ The tables used are formatted in an acceptable manner for the application to cre
       * * signifies that the column is required, and cannot be null.
       * ? signifies that the column is a searchable ID, used to get an list of all objects with same the ID.
       * - signifies that the column has it's sequence disabled.
-4. The fourth section is Foreign Keys.
+4. The fourth section is Compound Indexes (Optional).
+    1.The keyword Indexes must be surrounded by brackets ( [ ] ).
+    2.Use to create compound indexes within current table
+    3.Requires at least two inputs: the index name, and all the columns names separated by commas.
+
+5. The fifth section is Foreign Keys.
     1.The keyword ForeignKeys must be surrounded by brackets ( [ ] ).
     2.Use to create references to a column from another table
     3.Requires three inputs: the column name, the word 'constrainsTo', and the other table name.other column name
