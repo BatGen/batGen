@@ -54,6 +54,9 @@ EXAMPLE TABLE FILE: (employee.txt)
     STRING(132)    firstName     // First Name
     LONG(10)    supervisorKey   SUPERVISOR_KEY?
     
+    [Indexes]
+    name     2   lastName   firstName
+
     [ForeignKeys]
     supervisorKey constrainsTo Supervisor.supervisorKey
 ```
