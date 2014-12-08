@@ -153,7 +153,8 @@ public class XmlGenerator extends Generator {
                 + "\">\n" );
 
         //
-        if ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) ) ) {
+        if ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) )
+                && !table.getColumn( 0 ).isSequenceDisabled() ) {
             sb.append( TAB + TAB + "<selectKey resultType=\"_"
                     + table.getColumn( 0 ).getFldType().toLowerCase()
                     + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName()
