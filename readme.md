@@ -30,7 +30,7 @@ The tables used are formatted in an acceptable manner for the application to cre
       * If the data type is an double, then you must also specify a precision (total number of digits) and scale (number of digits to the right of the decimal point).
    4. The special characters that are allowed are !, *, ? and -.
       * ! signifies that the column is a primary key to the table. There can only be one primary key and it can only be              defined as a LONG(some value) or STRING(some value). If you do not create a key column, one will be automatically            generated for you.
-      * signifies that the column is required, and cannot be null.
+      * * signifies that the column is required, and cannot be null.
       * ? signifies that the column is a searchable ID, used to get an list of all objects with same the ID.
       * - signifies that the column has it's sequence disabled.
 4. The fourth section is Compound Indexes (Optional).
