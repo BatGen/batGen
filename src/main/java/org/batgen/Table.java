@@ -30,16 +30,17 @@ public class Table {
 
     private String comment;
     private String pkg;
-    private String domClass;
+    private String domName;
     private String tableName;
     private boolean hasSearch = false;
     private List<Column> columns = new ArrayList<Column>();
     private List<String> searchList = new ArrayList<String>();
+    private List<IndexNode> indexList = new ArrayList<IndexNode>();
 
     int count = 0;
 
     public String toString() {
-        String first = "The table, " + domClass + " is located in " + pkg
+        String first = "The table, " + domName + " is located in " + pkg
                 + ", its fields are: ";
         StringBuilder sb = new StringBuilder( first );
 
@@ -76,11 +77,11 @@ public class Table {
     }
 
     public void setDomName( String c ) {
-        domClass = c;
+        domName = c;
     }
 
     public String getDomName() {
-        return domClass;
+        return domName;
     }
 
     public void addColumn( Column c ) {
@@ -142,6 +143,13 @@ public class Table {
 
     public boolean hasSearch() {
         return hasSearch;
+    }
+
+    public void addIndex(IndexNode node){
+        indexList.add( node );
+    }
+    public List<IndexNode> getIndexList() {
+        return indexList;
     }
 
     /**
