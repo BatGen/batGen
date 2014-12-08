@@ -83,57 +83,59 @@ public class SqlGenerator extends Generator {
         for ( Column column : table.getColumns() ) {
 
             String name = column.getClass().getSimpleName();
-            if ( !name.equals( "ListColumn" ) ) {
-                sb.append( "    " + column.getColName().toUpperCase()
-                        + makeSpace( SPACE, column.getColName() ) );
+            sb.append( "    " + column.getColName().toUpperCase()
+                    + makeSpace( SPACE, column.getColName() ) );
 
-                if ( name.equals( "BlobColumn" ) ) {
-                    BlobColumn c = (BlobColumn) column;
-                    sb.append( column.getSqlType() );
-                    if ( c.getColLen() != null )
-                        sb.append( "(" + c.getColLen() + ")" );
+            if ( name.equals( "BlobColumn" ) ) {
+                BlobColumn c = (BlobColumn) column;
+                sb.append( column.getSqlType() );
+                if ( c.getColLen() != null )
+                    sb.append( "(" + c.getColLen() + ")" );
 
-                }
-                else if ( name.equals( "LengthColumn" ) ) {
-                    LengthColumn c = (LengthColumn) column;
-                    if ( c.getColLen() != null ) {
-                        if ( column.getSqlType().equals( "CHAR" ) ) {
-                            sb.append( column.getSqlType() );
-                        }
-                        else {
-                            sb.append( column.getSqlType() + "("
-                                    + c.getColLen() + ")" );
-                        }
-                    }
-
-                }
-                else if ( name.equals( "DoubleColumn" ) ) {
-                    DoubleColumn c = (DoubleColumn) column;
-                    if ( c.getColLen() != null ) {
-                        sb.append( column.getSqlType() + "(" + c.getColLen()
-                                + "," + c.getPrecision() + ")" );
-                    }
-
-                }
-                else if ( name.equals( "Column" ) ) {
-                    Column c = column;
-                    sb.append( c.getSqlType() );
-                }
-
-                if ( column.isRequired() )
-                    sb.append( " NOT NULL" );
-
-                if ( column.isKey() )
-                    key = column.getColName().toUpperCase();
-
-                sb.append( ",\n" );
             }
+            else if ( name.equals( "LengthColumn" ) ) {
+                LengthColumn c = (LengthColumn) column;
+                if ( c.getColLen() != null ) {
+                    if ( column.getSqlType().equals( "CHAR" ) ) {
+                        sb.append( column.getSqlType() );
+                    }
+                    else {
+                        sb.append( column.getSqlType() + "(" + c.getColLen()
+                                + ")" );
+                    }
+                }
+
+            }
+            else if ( name.equals( "DoubleColumn" ) ) {
+                DoubleColumn c = (DoubleColumn) column;
+                if ( c.getColLen() != null ) {
+                    sb.append( column.getSqlType() + "(" + c.getColLen() + ","
+                            + c.getPrecision() + ")" );
+                }
+
+            }
+            else if ( name.equals( "Column" ) ) {
+                Column c = column;
+                sb.append( c.getSqlType() );
+            }
+
+            if ( column.isRequired() ) {
+                sb.append( " NOT NULL" );
+            }
+
+            if ( column.isKey() ) {
+                key = column.getColName().toUpperCase();
+                sb.append( " NOT NULL" );
+            }
+
+            sb.append( ",\n" );
         }
 
         sb.append( "    CONSTRAINT " + table.getTableName()
                 + "_PK PRIMARY KEY (" + key.toUpperCase() + ")" );
 
         sb.append( ");\n" );
+
         sb.append( "\nCREATE SEQUENCE " + table.getTableName() + "_SEQ;\n" );
 
         sb.append( writeIndexes() );
