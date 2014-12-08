@@ -24,27 +24,17 @@
 package org.batgen;
 
 public class Column {
-    /**
-     * Flag values are as follows:
-     * 
-     * bit 1 = required bit 1&2 = key bit 3 = sequence disabled bit 8 = search
-     * id
-     * 
-     */
-    public static final int REQUIRED = 1;
-    public static final int KEY = 2;
-    public static final int SEQUENCE_DISABLED = 4;
-    public static final int SEARCH_ID = 8;
 
     private FieldType type;
+    private String    fldName;
+    private String    colName;
+    private String    comment;
+    private Table     table;
 
-    private String fldName;
-    private String colName;
-    private String comment;
-
-    private Table table;
-
-    private int flags;
+    private boolean   key;
+    private boolean   required;
+    private boolean   sequenceDisable;
+    private boolean   searchId;
 
     public void setType( FieldType type ) {
         this.type = type;
@@ -91,35 +81,35 @@ public class Column {
     }
 
     public void setRequired() {
-        flags |= REQUIRED;
+        required = true;
     }
 
     public boolean isRequired() {
-        return ( flags & KEY ) != 0;
+        return required;
     }
 
     public void setKey() {
-        flags |= KEY | REQUIRED;
+        key = true;
     }
 
     public boolean isKey() {
-        return ( flags & KEY ) != 0;
+        return key;
     }
 
     public void setSequenceDisabled() {
-        flags |= SEQUENCE_DISABLED;
+        sequenceDisable = true;
     }
 
     public boolean isSequenceDisabled() {
-        return ( flags & SEQUENCE_DISABLED ) != 0;
+        return sequenceDisable;
     }
 
     public void setSearchId() {
-        flags |= SEARCH_ID;
+        searchId = true;
     }
 
     public boolean isSearchId() {
-        return ( flags & SEARCH_ID ) != 0;
+        return searchId;
     }
 
     public void setTable( Table table ) {
@@ -134,7 +124,7 @@ public class Column {
     public String toString() {
         return "Column [fldName=" + fldName + ", colName=" + colName
                 + ", fldType=" + getFldType() + ", colType=" + getSqlType()
-                + ", comment=" + comment + ", required="
-                + isRequired() + ", key=" + isKey() + "searchable=" +isSearchId() +"]";
+                + ", comment=" + comment + ", required=" + isRequired()
+                + ", key=" + isKey() + "searchable=" + isSearchId() + "]";
     }
 }
