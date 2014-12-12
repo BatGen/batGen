@@ -63,7 +63,7 @@ public class SqlGenerator extends Generator {
 
         writeToFile( filePath, sb.toString() );
 
-        appendToFile( "sql/CreateTables.sql", writeColumns() );
+        appendToFile( "sql/_CreateTables.sql", writeColumns() );
         writeDropsFile();
 
         return filePath;
@@ -180,7 +180,7 @@ public class SqlGenerator extends Generator {
     }
 
     private void writeDropsFile() {
-        appendToFile( "sql/DropTables.sql", drop() + "\n\n" );
+        appendToFile( "sql/_DropTables.sql", drop() + "\n\n" );
     }
 
     private String drop() {
