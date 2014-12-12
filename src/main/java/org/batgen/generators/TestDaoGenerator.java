@@ -31,11 +31,11 @@ import static org.batgen.generators.GenUtil.*;
 
 public class TestDaoGenerator extends Generator {
 
-    private int countRead = 0, countLoop = 0, countDelete = 1;
-    private String daoName = "";
+    private int     countRead        = 0, countLoop = 0, countDelete = 1;
+    private String  daoName          = "";
     private boolean getCreatedCalled = false;
-    private String filePath;
-    private String keyName;
+    private String  filePath;
+    private String  keyName;
 
     public TestDaoGenerator( Table table ) {
         super( table );
@@ -340,7 +340,8 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "public static int randomNumber() {\n\n" );
-        sb.append( TAB + "" + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
+        sb.append( TAB + "" + TAB
+                + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
         sb.append( TAB + "}\n" );
 
         return sb.toString();
@@ -409,48 +410,37 @@ public class TestDaoGenerator extends Generator {
                 }
             }
 
-            // This is a bug fix - previously there was no way to handle keys
-            // properly when generating the tests
-            // Code would either ignore all keys, or alter primary keys that had
-            // been set by the database
-            if ( column.isKey() ) {
-                // This is the primary key, ignore it!
+            sb.append( TAB + TAB + toJavaCase( variable ) + ".set"
+                    + toCamelCase( column.getFldName() ) + "(" );
+
+            if ( column.getFldType().equalsIgnoreCase( "Boolean" ) ) {
+                sb.append( " true " );
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "String" ) ) {
+                if ( column.getClass().getSimpleName().equals( "LengthColumn" ) ) {
+                    LengthColumn c = (LengthColumn) column;
+                    sb.append( " randomString( \"" + column.getFldName()
+                            + "\", " + c.getColLen() + " )" );
+                }
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "Date" ) ) {
+                sb.append( " new Date()" );
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "byte[]" ) ) {
+                sb.append( " randomByteArray( 10 )" );
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "Double" ) ) {
+                sb.append( " (double) randomNumber()" );
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "Integer" ) ) {
+                sb.append( " randomNumber()" );
+            }
+            else if ( column.getFldType().equalsIgnoreCase( "Long" ) ) {
+                sb.append( " (long) 0" );
             }
 
-            else {
+            sb.append( " );\n" );
 
-                sb.append( TAB + TAB + toJavaCase( variable ) + ".set"
-                        + toCamelCase( column.getFldName() ) + "(" );
-
-                if ( column.getFldType().equalsIgnoreCase( "Boolean" ) ) {
-                    sb.append( " true " );
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "String" ) ) {
-                    if ( column.getClass().getSimpleName()
-                            .equals( "LengthColumn" ) ) {
-                        LengthColumn c = (LengthColumn) column;
-                        sb.append( " randomString( \"" + column.getFldName()
-                                + "\", " + c.getColLen() + " )" );
-                    }
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "Date" ) ) {
-                    sb.append( " new Date()" );
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "byte[]" ) ) {
-                    sb.append( " randomByteArray( 10 )" );
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "Double" ) ) {
-                    sb.append( " (double) randomNumber()" );
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "Integer" ) ) {
-                    sb.append( " randomNumber()" );
-                }
-                else if ( column.getFldType().equalsIgnoreCase( "Long" ) ) {
-                    sb.append( " (long) 0" );
-                }
-
-                sb.append( " );\n" );
-            }
         }
         return sb.toString();
     }
@@ -493,5 +483,4 @@ public class TestDaoGenerator extends Generator {
         line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );
         return line;
     }
-
 }
