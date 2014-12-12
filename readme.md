@@ -8,7 +8,7 @@ See http://batgen.github.io/documentation.html for more information.
 ## HOW TO USE:
 ```
     //takes 3 parameters, location of source files, package location, and database type.
-    BatGen batGen = new BatGen( "src/test/resources", "org.batgen.sample", DatabaseType.H2);
+    BatGen batGen = new BatGen( "src/test/resources", "org.batgen.sample", DatabaseType.ORACLE);
     batGen.run();
 ```
 
@@ -36,12 +36,12 @@ The tables used are formatted in an acceptable manner for the application to cre
 4. The fourth section is Compound Indexes (Optional).
     1. The keyword Indexes must be surrounded by brackets ( [ ] ).
     2. Use to create compound indexes within current table
-    3. Requires at least two inputs: the index name, and all the columns names separated by commas.
+    3. Requires at least two inputs: the index name, and all the columns names(second column in the txt file) separated by commas.
 
 5. The fifth section is Foreign Keys (Optional).
     1. The keyword ForeignKeys must be surrounded by brackets ( [ ] ).
     2. Use to create references to a column from another table
-    3. Requires three inputs: the column name, the word 'constrainsTo', and the other table name.other column name
+    3. Requires three inputs: the column name(second column in the txt file), the word 'constrainsTo', and the other table name.other column name
 
 EXAMPLE TABLE FILE: (employee.txt)
 ```
