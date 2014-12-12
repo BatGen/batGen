@@ -176,7 +176,7 @@ public class BatGen {
         }
 
         // build foreign keys
-        GenUtil.writeToFile( "sql/AlterTables.sql", createForeignKeys() );
+        GenUtil.writeToFile( "sql/_AlterTables.sql", createForeignKeys() );
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
@@ -185,9 +185,9 @@ public class BatGen {
                 basePkg, databaseType );
         printPath( mcg.createConfiguration() );
 
-        printPath( "sql/CreateTables.sql" );
-        printPath( "sql/AlterTables.sql" );
-        printPath( "sql/DropTables.sql" );
+        printPath( "sql/_CreateTables.sql" );
+        printPath( "sql/_AlterTables.sql" );
+        printPath( "sql/_DropTables.sql" );
 
         System.out.println( "\nDone." );
     }
