@@ -340,7 +340,7 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "public static int randomNumber() {\n\n" );
-        sb.append( TAB + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
+        sb.append( TAB + "" + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
         sb.append( TAB + "}\n" );
 
         return sb.toString();

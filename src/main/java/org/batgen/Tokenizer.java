@@ -312,7 +312,7 @@ public class Tokenizer {
                 return s;
             }
             else {
-                s = "Error: The brackets must contain only 'Settings', 'Fields', 'Indexes' or 'ForeignKeys'.";
+                s = "Error: The brackets must contain only 'Settings', 'Fields', or 'ForeignKeys'.";
             }
 
         }
