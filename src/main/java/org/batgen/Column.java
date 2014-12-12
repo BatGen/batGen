@@ -68,8 +68,7 @@ public class Column {
         if ( type == null )
             throw new IllegalStateException( "type was never assigned for: "
                     + table.getDomName() + "." + colName );
-
-        return isRequired() ? type.getPrimativeType() : type.getWrapperType();
+        return type.getWrapperType();
     }
 
     public void setComment( String comment ) {
