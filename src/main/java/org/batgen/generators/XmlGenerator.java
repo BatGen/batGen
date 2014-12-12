@@ -291,8 +291,12 @@ public class XmlGenerator extends Generator {
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
             }
-            if ( i != sqlVariables.size() - 1 )
+            if ( i % 5 == 4 ) {
+                list.append( " ," );
+            }
+            else if ( i != sqlVariables.size() - 1 ) {
                 list.append( " , " );
+            }
         }
 
         return list.toString();
@@ -307,8 +311,12 @@ public class XmlGenerator extends Generator {
             list.append( "#{" );
             list.append( javaVariables.get( i ) );
             list.append( "}" );
-            if ( i != javaVariables.size() - 1 )
+            if ( i % 5 == 4 ) {
+                list.append( " ," );
+            }
+            else if ( i != javaVariables.size() - 1 ) {
                 list.append( " , " );
+            }
         }
 
         return list.toString();
@@ -329,7 +337,7 @@ public class XmlGenerator extends Generator {
             list.append( makeSpace( 35, list.toString() ) );
             list.append( "= #{" + javaVariables.get( i ) + "}" );
             if ( i != javaVariables.size() - 1 ) {
-                list.append( " , " );
+                list.append( " ," );
                 list.append( "\n" );
             }
             total.append( TAB + TAB + TAB + list );
