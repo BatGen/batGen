@@ -38,11 +38,11 @@ import static org.batgen.generators.GenUtil.*;
 
 public class SqlGenerator extends Generator {
 
-    private String          key       = "KEY";
     private final int       SPACE     = 18;
     private String          filePath;
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
     private List<String>    fieldList = new ArrayList<String>();
+    private List<String>    keyList   = new ArrayList<String>();
 
     public SqlGenerator( Table table ) {
         super( table );
@@ -52,28 +52,22 @@ public class SqlGenerator extends Generator {
 
     public String createSql() {
         StringBuilder sb = new StringBuilder();
+        String table = writeColumns();
 
         sb.append( messageRemove() );
         sb.append( drop() );
         sb.append( messageCreate() );
-        sb.append( createTable() );
+        sb.append( table );
         sb.append( messageSample() );
         sb.append( createSample() );
         sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
 
-        appendToFile( "sql/_CreateTables.sql", writeColumns() );
+        appendToFile( "sql/_CreateTables.sql", table );
         writeDropsFile();
 
         return filePath;
-    }
-
-    private String createTable() {
-        StringBuilder sb = new StringBuilder();
-        sb.append( writeColumns() );
-
-        return sb.toString();
     }
 
     private String writeColumns() {
@@ -124,7 +118,7 @@ public class SqlGenerator extends Generator {
             }
 
             if ( column.isKey() ) {
-                key = column.getColName().toUpperCase();
+                keyList.add( column.getColName().toUpperCase() );
                 sb.append( " NOT NULL" );
             }
 
@@ -132,7 +126,12 @@ public class SqlGenerator extends Generator {
         }
 
         sb.append( "    CONSTRAINT " + table.getTableName()
-                + "_PK PRIMARY KEY (" + key.toUpperCase() + ")" );
+                + "_PK PRIMARY KEY ( " );
+        for ( String key : keyList ) {
+            sb.append( key.toUpperCase() + ", " );
+        }
+        sb.deleteCharAt( sb.length() - 2 );
+        sb.append( ")" );
 
         sb.append( ");\n" );
 
@@ -173,14 +172,19 @@ public class SqlGenerator extends Generator {
         }
 
         sb.deleteCharAt( sb.length() - 2 );
-        sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    " + key
-                + " = 0;\n" );
-
+        if ( keyList.isEmpty() ) {
+            sb.append( "\nfrom " + table.getTableName()
+                    + "\nWHERE\n    KEY = 0;\n" );
+        }
+        else {
+            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    "
+                    + keyList.get( 0 ) + " = 0;\n" );
+        }
         return sb.toString();
     }
 
     private void writeDropsFile() {
-        appendToFile( "sql/_DropTables.sql", drop() + "\n\n" );
+        appendToFile( "sql/_DropTables.sql", drop() + "\n" );
     }
 
     private String drop() {
