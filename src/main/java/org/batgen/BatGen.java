@@ -45,13 +45,13 @@ import org.batgen.generators.XmlGenerator;
  * 
  */
 public class BatGen {
-    private String              basePkg;
-    private String              configPath;
+    private String       basePkg;
+    private String       configPath;
 
-    private DatabaseType        databaseType;
+    private DatabaseType databaseType;
 
-    private boolean             allFiles;
-    private int                 fileCount;
+    private boolean      allFiles;
+    private int          fileCount;
 
     /**
      * Initializes the code generator.
@@ -106,11 +106,15 @@ public class BatGen {
             allFiles = false;
         }
 
-        File file = new File( "sql/CreateTables.sql" );
+        File file = new File( "sql/_CreateTables.sql" );
         if ( file.isFile() )
             file.delete();
 
-        file = new File( "sql/DropTables.sql" );
+        file = new File( "sql/_AlterTables.sql" );
+        if ( file.isFile() )
+            file.delete();
+
+        file = new File( "sql/_DropTables.sql" );
         if ( file.isFile() )
             file.delete();
 
@@ -279,7 +283,7 @@ public class BatGen {
                 }
 
                 if ( fromFieldExist && toFieldExist ) {
-                    sb.append( "ALTER TABLE " + fromTable.getTableName());
+                    sb.append( "ALTER TABLE " + fromTable.getTableName() );
                     sb.append( " ADD FOREIGN KEY (" + fromField + ") " );
                     sb.append( "REFERENCES " + toTable.getTableName() + "("
                             + toField + ");\n" );
