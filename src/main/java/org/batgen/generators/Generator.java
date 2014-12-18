@@ -149,14 +149,15 @@ public class Generator {
         }
 
         List<String> lines = getProtectedLines( fn );
-        if ( lines.isEmpty() && !fn.contains( ".sql" ) ) {
+        if ( lines.isEmpty() && !fn.contains( ".sql") && !fn.contains( ".xml")) {
             sb.append( "\n\n}" );
         }
-
+        else if(lines.isEmpty() && fn.contains( ".xml")){
+            sb.append( "\n\n</mapper>");
+        }
         for ( String line : lines ) {
             sb.append( line );
         }
-
         return sb.toString();
     }
 }
