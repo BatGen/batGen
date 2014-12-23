@@ -110,10 +110,6 @@ public class BatGen {
         if ( file.isFile() )
             file.delete();
 
-        file = new File( "sql/_AlterTables.sql" );
-        if ( file.isFile() )
-            file.delete();
-
         file = new File( "sql/_DropTables.sql" );
         if ( file.isFile() )
             file.delete();
@@ -180,7 +176,9 @@ public class BatGen {
         }
 
         // build foreign keys
-        GenUtil.writeToFile( "sql/_AlterTables.sql", createForeignKeys() );
+        StringBuilder sb = new StringBuilder();
+        sb.append( createForeignKeys() );
+        GenUtil.writeToFile( "sql/_AlterTables.sql", sb.toString() );
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
@@ -297,6 +295,14 @@ public class BatGen {
                         "Either the tables names are wrong or don't exist for foreign keys." );
         }
 
+        sb.append( "\n-- PROTECTED CODE -->" );
+        List<String> lines = GenUtil.getProtectedLines( "sql/_AlterTables.sql" );
+        if ( lines.isEmpty() ) {
+            sb.append( "\n" );
+        }
+        for ( String line : lines ) {
+            sb.append( line );
+        }
         return sb.toString();
     }
 
