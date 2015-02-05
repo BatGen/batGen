@@ -35,8 +35,8 @@ public class DoubleColumn extends LengthColumn {
     }
     
     @Override
-    public void setLength( String p ) {
-        this.length = p + precision;
+    public void setColLen( String p ) {
+        this.colLen = p + precision;
     }
 
     public String toString() {
