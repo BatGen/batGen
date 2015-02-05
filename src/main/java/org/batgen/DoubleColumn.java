@@ -33,6 +33,11 @@ public class DoubleColumn extends LengthColumn {
     public String getPrecision() {
         return precision;
     }
+    
+    @Override
+    public void setLength( String p ) {
+        this.length = p + precision;
+    }
 
     public String toString() {
         return "Column [fldName=" + getFldName() + ", colName=" + getColName()
