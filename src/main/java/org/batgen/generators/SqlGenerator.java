@@ -98,30 +98,25 @@ public class SqlGenerator extends Generator {
                                 + ")" );
                     }
                 }
-
             }
             else if ( name.equals( "DoubleColumn" ) ) {
                 DoubleColumn c = (DoubleColumn) column;
                 if ( c.getColLen() != null ) {
-                    sb.append( column.getSqlType() + "(" + c.getColLen() + c.getPrecision() ","
+                    sb.append( column.getSqlType() + "(" + (Integer.parseInt(c.getColLen()) + Integer.parseInt(c.getPrecision())) + ","
                             + c.getPrecision() + ")" );
                 }
-
             }
             else if ( name.equals( "Column" ) ) {
                 Column c = column;
                 sb.append( c.getSqlType() );
             }
-
             if ( column.isRequired() ) {
                 sb.append( " NOT NULL" );
             }
-
             if ( column.isKey() ) {
                 keyList.add( column.getColName().toUpperCase() );
                 sb.append( " NOT NULL" );
             }
-
             sb.append( ",\n" );
         }
 
