@@ -103,7 +103,7 @@ public class SqlGenerator extends Generator {
             else if ( name.equals( "DoubleColumn" ) ) {
                 DoubleColumn c = (DoubleColumn) column;
                 if ( c.getColLen() != null ) {
-                    sb.append( column.getSqlType() + "(" + c.getColLen() + ","
+                    sb.append( column.getSqlType() + "(" + c.getColLen() + c.getPrecision() ","
                             + c.getPrecision() + ")" );
                 }
 
