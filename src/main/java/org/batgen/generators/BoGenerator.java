@@ -23,9 +23,14 @@
  */
 package org.batgen.generators;
 
-import org.batgen.*;
+import static org.batgen.generators.GenUtil.writeToFile;
 
-import static org.batgen.generators.GenUtil.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.batgen.Column;
+import org.batgen.IndexNode;
+import org.batgen.Table;
 
 /**
  * This code generates the Business Objects.
@@ -41,8 +46,7 @@ public class BoGenerator extends Generator {
     public BoGenerator( Table table ) {
         super( table );
         boName = table.getDomName() + "Bo";
-        filePath = "src/main/java/" + packageToPath() + "/bo/" + boName
-                + ".java";
+        filePath = "src/main/java/" + packageToPath() + "/bo/" + boName + ".java";
 
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
@@ -119,6 +123,10 @@ public class BoGenerator extends Generator {
         writeMethodBody( "read" );
         write( NEWLINE );
 
+        if ( !table.getIndexList().isEmpty() ) {
+            writeCompoundKeys();
+        }
+
     }
 
     private void writeMethodBody( String type ) {
@@ -153,7 +161,64 @@ public class BoGenerator extends Generator {
         write( TAB + "}\n" );
     }
 
-    void writeList() {
+    private void writeCompoundKeys() {
+        String mapperName = table.getDomName() + "Dao";
+        StringBuilder sb = new StringBuilder();
+        // make mappings
+        Map<String, String> typeMap = new HashMap<String, String>();
+        for ( IndexNode node : table.getIndexList() ) {
+            for ( String fldName : node.getVarList() ) {
+                for ( Column column : table.getColumns() ) {
+                    if ( column.getFldName().equals( fldName ) ) {
+                        typeMap.put( fldName, column.getFldType() );
+                    }
+                }
+            }
+        }
+
+        for ( IndexNode node : table.getIndexList() ) {
+            sb.append( TAB + "public " + table.getDomName() + " readByIndex" + node.getIndexName() + "( " );
+            for ( String fldName : node.getVarList() ) {
+                sb.append( typeMap.get( fldName ) + " " + fldName + ", " );
+            }
+            sb.replace( sb.length() - 2, sb.length() - 1, " ) throws BoException" );
+            sb.append( "{\n" );
+
+            sb.append( TAB + TAB + "SqlSession session = null;\n" );
+            sb.append( TAB + TAB + table.getDomName() + " result;\n" );
+            String where = "";
+            for ( int i = 0; i < node.getFieldList().size(); i ++ ) {
+                where += "\"" + node.getFieldList().get( i ) + "='\" + " + node.getVarList().get( i ) + " + \"' and \" + ";
+            }
+            where = where.substring( 0, where.length() - 8 );
+            where += "\";\n";
+            sb.append( TAB + TAB + "String where = " + where);
+
+            sb.append( TAB + TAB + "Map<String, Object> map = new HashMap<String, Object>();\n" );
+            sb.append( TAB + TAB + "map.put( \"where\", where );\n" );
+
+            sb.append( TAB + TAB + "try {\n" );
+            sb.append( TAB + TAB + TAB + "session = SessionFactory.getSession();\n" );
+            sb.append( TAB + TAB + TAB + mapperName );
+            sb.append( " mapper = session.getMapper( " + mapperName + ".class );\n" );
+            sb.append( TAB + TAB + TAB + "result = mapper.readByIndex( map );\n" );
+            sb.append( TAB + TAB + TAB + "session.commit();\n\n" );
+            sb.append( TAB + TAB + "} catch ( Exception e ) {\n" );
+            sb.append( TAB + TAB + TAB + "session.rollback();\n" );
+            sb.append( TAB + TAB + TAB + "throw new BoException( e );\n\n" );
+            sb.append( TAB + TAB + "} finally { \n" );
+            sb.append( TAB + TAB + TAB + "if ( session != null )\n" );
+            sb.append( TAB + TAB + TAB + TAB + "session.close();\n" );
+            sb.append( TAB + TAB + "}\n\n" );
+            sb.append( TAB + TAB + "return result;\n" );
+            sb.append( TAB + "}\n" );
+
+        }
+
+        write( sb.toString() );
+    }
+
+    private void writeList() {
         String mapperName = table.getDomName() + "Dao";
 
         for ( Column column : table.getColumns() ) {
@@ -175,12 +240,10 @@ public class BoGenerator extends Generator {
                 write( TAB + TAB + "List<" + table.getDomName() + "> list;\n\n" );
 
                 write( TAB + TAB + "try {\n" );
-                write( TAB + TAB + TAB
-                        + "session = SessionFactory.getSession();\n" );
+                write( TAB + TAB + TAB + "session = SessionFactory.getSession();\n" );
 
                 write( TAB + TAB + TAB + mapperName );
-                write( " mapper = session.getMapper( " + mapperName
-                        + ".class );\n" );
+                write( " mapper = session.getMapper( " + mapperName + ".class );\n" );
                 write( TAB + TAB + TAB + "list = mapper." );
                 write( "getListBy" );
                 write( fieldName );
@@ -205,13 +268,15 @@ public class BoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
-
+        imports.addImport( "import java.util.Date;");
+        if(!table.getIndexList().isEmpty()){
+            imports.addImport( "import java.util.HashMap;" );
+            imports.addImport( "import java.util.Map;" );
+        }
         imports.addImport( "import org.apache.ibatis.session.*;" );
         imports.addImport( "import " + table.getPackage() + ".dao.*;" );
-        imports.addImport( "import " + table.getPackage() + ".domain."
-                + table.getDomName() + ";" );
-        imports.addImport( "import " + table.getPackage() + ".util."
-                + "BoException;" );
+        imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
+        imports.addImport( "import " + table.getPackage() + ".util." + "BoException;" );
 
         write( imports.toString() );
 
@@ -219,8 +284,7 @@ public class BoGenerator extends Generator {
 
     private void createBoException() {
         sb = new StringBuilder();
-        String filePath = "src/main/java/" + packageToPath()
-                + "/util/BoException.java";
+        String filePath = "src/main/java/" + packageToPath() + "/util/BoException.java";
 
         sb.append( "package " );
         sb.append( table.getPackage() );
