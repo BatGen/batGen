@@ -23,14 +23,14 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.writeToFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.batgen.Column;
 import org.batgen.DatabaseType;
 import org.batgen.Table;
-
-import static org.batgen.generators.GenUtil.*;
 
 public class XmlGenerator extends Generator {
     public static String     NEWLINE           = "\n";
@@ -48,8 +48,7 @@ public class XmlGenerator extends Generator {
         super( table );
         this.daoName = table.getDomName() + "Dao";
         this.databaseType = databaseType;
-        filePath = "src/main/resources/" + packageToPath() + "/dao/" + daoName
-                + ".xml";
+        filePath = "src/main/resources/" + packageToPath() + "/dao/" + daoName + ".xml";
         filePath = filePath.replace( "_", "" );
     }
 
@@ -67,6 +66,7 @@ public class XmlGenerator extends Generator {
         sb.append( createGetListBy() );
         sb.append( createUpdate() );
         sb.append( createDelete() );
+        sb.append( createCompoundKeys() );
         sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
@@ -77,8 +77,8 @@ public class XmlGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" );
-        sb.append( "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\"\n"
-                + TAB + "\"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">" );
+        sb.append( "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\"\n" + TAB
+                + "\"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">" );
 
         return sb.toString();
     }
@@ -88,20 +88,16 @@ public class XmlGenerator extends Generator {
 
         sb.append( "\n" );
 
-        sb.append( "<mapper namespace=\"" + table.getPackage() + ".dao."
-                + table.getDomName() + "Dao\">\n" );
-        sb.append( "\n" + TAB + "<resultMap id=\"" + table.getDomName()
-                + "Mapper\" type=\"" + table.getPackage() + ".domain."
-                + table.getDomName() + "\">" );
+        sb.append( "<mapper namespace=\"" + table.getPackage() + ".dao." + table.getDomName() + "Dao\">\n" );
+        sb.append( "\n" + TAB + "<resultMap id=\"" + table.getDomName() + "Mapper\" type=\"" + table.getPackage()
+                + ".domain." + table.getDomName() + "\">" );
 
         for ( int i = 0; i < table.getColumns().size(); i++ ) {
             StringBuilder string = new StringBuilder();
 
-            string.append( TAB + TAB + "<result column =\""
-                    + table.getColumn( i ).getColName().toUpperCase() + "\" " );
+            string.append( TAB + TAB + "<result column =\"" + table.getColumn( i ).getColName().toUpperCase() + "\" " );
             string.append( makeSpace( columnSpace, string.toString() ) );
-            string.append( "property = \"" + table.getColumn( i ).getFldName()
-                    + "\" />" );
+            string.append( "property = \"" + table.getColumn( i ).getFldName() + "\" />" );
             sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
             javaVariables.add( table.getColumn( i ).getFldName() );
 
@@ -124,20 +120,16 @@ public class XmlGenerator extends Generator {
         sb.append( "\n" );
 
         if ( ( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) ) ) {
-            sb.append( TAB + "<select id=\"read\" parameterType=\""
-                    + table.getColumn( 0 ).getFldType().toLowerCase()
+            sb.append( TAB + "<select id=\"read\" parameterType=\"" + table.getColumn( 0 ).getFldType().toLowerCase()
                     + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
         }
         else {
-            sb.append( TAB + "<select id=\"read\" parameterType=\"_"
-                    + table.getColumn( 0 ).getFldType().toLowerCase()
+            sb.append( TAB + "<select id=\"read\" parameterType=\"_" + table.getColumn( 0 ).getFldType().toLowerCase()
                     + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
         }
 
-        sb.append( TAB + TAB + "select * from "
-                + table.getTableName().toUpperCase() + "\n" + TAB + TAB
-                + "where " + sqlVariables.get( 0 ) + " = #{"
-                + javaVariables.get( 0 ) + "}\n" );
+        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" + TAB + TAB + "where "
+                + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
 
         sb.append( TAB + "</select>\n" );
 
@@ -148,17 +140,14 @@ public class XmlGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
-        sb.append( TAB + "<insert id=\"create\" parameterType=\""
-                + table.getPackage() + ".domain." + table.getDomName()
-                + "\">\n" );
+        sb.append( TAB + "<insert id=\"create\" parameterType=\"" + table.getPackage() + ".domain."
+                + table.getDomName() + "\">\n" );
 
         //
         if ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) )
                 && !table.getColumn( 0 ).isSequenceDisabled() ) {
-            sb.append( TAB + TAB + "<selectKey resultType=\"_"
-                    + table.getColumn( 0 ).getFldType().toLowerCase()
-                    + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName()
-                    + "\" order=\"BEFORE\">\n" );
+            sb.append( TAB + TAB + "<selectKey resultType=\"_" + table.getColumn( 0 ).getFldType().toLowerCase()
+                    + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName() + "\" order=\"BEFORE\">\n" );
 
             switch ( databaseType ) {
             case H2:
@@ -175,11 +164,10 @@ public class XmlGenerator extends Generator {
         }
         //
 
-        sb.append( TAB + TAB + "insert into "
-                + table.getTableName().toUpperCase() + "\n" );
+        sb.append( TAB + TAB + "insert into " + table.getTableName().toUpperCase() + "\n" );
         sb.append( TAB + TAB + "(\n" );
-        sb.append( TAB + TAB + TAB + getVariablesList() + "\n" + TAB + TAB
-                + ")\n" + TAB + TAB + "values\n" + TAB + TAB + "(\n" );
+        sb.append( TAB + TAB + TAB + getVariablesList() + "\n" + TAB + TAB + ")\n" + TAB + TAB + "values\n" + TAB + TAB
+                + "(\n" );
         sb.append( TAB + TAB + TAB + getjavaList() + "\n" );
         sb.append( TAB + TAB + ")\n" );
         sb.append( TAB + "</insert>\n" );
@@ -233,18 +221,15 @@ public class XmlGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
-        sb.append( "\n" + TAB + "<update id=\"update\" parameterType=\""
-                + table.getPackage() + ".domain." + table.getDomName()
-                + "\">\n" );
-        sb.append( TAB + TAB + "update " + table.getTableName().toUpperCase()
-                + " set\n" );
+        sb.append( "\n" + TAB + "<update id=\"update\" parameterType=\"" + table.getPackage() + ".domain."
+                + table.getDomName() + "\">\n" );
+        sb.append( TAB + TAB + "update " + table.getTableName().toUpperCase() + " set\n" );
         sb.append( getCombinedList() + "\n" );
 
         switch ( databaseType ) {
         case H2:
         case ORACLE:
-            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
+            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
         }
 
         sb.append( TAB + "</update>" );
@@ -265,16 +250,31 @@ public class XmlGenerator extends Generator {
                     + table.getColumn( 0 ).getFldType().toLowerCase() + "\">\n" );
         }
 
-        sb.append( TAB + TAB + "delete from "
-                + table.getTableName().toUpperCase() + "\n" );
+        sb.append( TAB + TAB + "delete from " + table.getTableName().toUpperCase() + "\n" );
 
         switch ( databaseType ) {
         case H2:
         case ORACLE:
-            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{"
-                    + javaVariables.get( 0 ) + "}\n" );
+            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
         }
         sb.append( TAB + "</delete>" );
+
+        return sb.toString();
+    }
+
+    private String createCompoundKeys() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append( "\n" );
+        sb.append( "\n" );
+
+        sb.append( TAB + "<select id=\"readByIndex\" parameterType=\"map\"" + " resultMap=\"" + table.getDomName()
+                + "Mapper\">\n" );
+
+        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" + TAB + TAB + "where "
+                + "${where}\n" );
+
+        sb.append( TAB + "</select>\n" );
 
         return sb.toString();
     }
@@ -291,7 +291,10 @@ public class XmlGenerator extends Generator {
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
             }
-
+            // if ( i % 5 == 4 ) {
+            // list.append( " ," );
+            // }
+            // else
             if ( i != sqlVariables.size() - 1 ) {
                 list.append( " , " );
             }
@@ -309,7 +312,10 @@ public class XmlGenerator extends Generator {
             list.append( "#{" );
             list.append( javaVariables.get( i ) );
             list.append( "}" );
-
+            // if ( i % 5 == 4 ) {
+            // list.append( " ," );
+            // }
+            // else
             if ( i != javaVariables.size() - 1 ) {
                 list.append( " , " );
             }
