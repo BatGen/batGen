@@ -23,7 +23,11 @@
  */
 package org.batgen;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +39,7 @@ import java.util.List;
 public class Parser {
     private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
     private static List<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
+    private List<String>                  varList      = new ArrayList<String>();
     private List<String>                  fieldList      = new ArrayList<String>();
 
     private String                        fileName;
@@ -341,7 +346,7 @@ public class Parser {
         if ( indexName == null ) {
             throwException( "Expecting a name for the index." );
         }
-
+        varList.clear();
         fieldList.clear();
         String fieldName = "";
         while ( !isNewLine( token ) ) {
@@ -352,6 +357,7 @@ public class Parser {
                 contain = false;
                 for ( Column col : table.getColumns() ) {
                     if ( fieldName.equals( col.getFldName() ) ) {
+                        varList.add( fieldName );
                         fieldList.add( col.getColName() );
                         contain = true;
                         break;
@@ -362,9 +368,9 @@ public class Parser {
                 }
             }
         }
-
-        final List<String> list = new ArrayList<String>( fieldList );
-        table.addIndex( new IndexNode( indexName, list ) );
+        final List<String> listVar = new ArrayList<String>( varList);
+        final List<String> listCol = new ArrayList<String>( fieldList );
+        table.addIndex( new IndexNode( indexName, listVar, listCol ) );
     }
 
     private void parseForeignKeys( Token token ) {
