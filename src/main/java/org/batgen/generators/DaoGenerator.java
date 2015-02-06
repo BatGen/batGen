@@ -23,11 +23,12 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.writeToFile;
+
 import java.io.File;
 
-import org.batgen.*;
-
-import static org.batgen.generators.GenUtil.*;
+import org.batgen.Column;
+import org.batgen.Table;
 
 /**
  * Generates a basic set of DAO classes.
@@ -45,8 +46,7 @@ public class DaoGenerator extends Generator {
         super( table );
         this.table = table;
         daoName = table.getDomName() + "Dao";
-        filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName
-                + ".java";
+        filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName + ".java";
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
                 keyColumn = column;
@@ -72,21 +72,17 @@ public class DaoGenerator extends Generator {
     private void createDaoExceptions() {
 
         sb = new StringBuilder();
-        String filePath = "src/main/java/" + packageToPath()
-                + "/util/DaoException.java";
+        String filePath = "src/main/java/" + packageToPath() + "/util/DaoException.java";
         File file = new File( filePath );
 
         if ( !file.exists() ) {
             sb.append( "package " + table.getPackage() + ".util;\n" + "\n"
-                    + "public class DaoException extends Exception {\n" + TAB
-                    + "\n" + TAB
-                    + "private static final long serialVersionUID = 1L;\n"
-                    + "\n" + TAB + "public DaoException(Throwable e) {\n" + TAB
-                    + TAB + "super(e);\n" + TAB + "}\n" + "\n" + TAB
-                    + "public DaoException(String msg) {\n" + TAB + TAB
-                    + "super(msg);\n" + TAB + "}\n" + "\n" + TAB
-                    + "public DaoException(String msg, Throwable e) {\n" + TAB
-                    + TAB + "super(msg, e);\n" + TAB + "}\n" + "\n\n" );
+                    + "public class DaoException extends Exception {\n" + TAB + "\n" + TAB
+                    + "private static final long serialVersionUID = 1L;\n" + "\n" + TAB
+                    + "public DaoException(Throwable e) {\n" + TAB + TAB + "super(e);\n" + TAB + "}\n" + "\n" + TAB
+                    + "public DaoException(String msg) {\n" + TAB + TAB + "super(msg);\n" + TAB + "}\n" + "\n" + TAB
+                    + "public DaoException(String msg, Throwable e) {\n" + TAB + TAB + "super(msg, e);\n" + TAB + "}\n"
+                    + "\n\n" );
             sb.append( getProtectedJavaLines( filePath ) );
             writeToFile( filePath, sb.toString() );
         }
@@ -97,10 +93,10 @@ public class DaoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
-        imports.addImport( "import " + table.getPackage() + ".domain."
-                + table.getDomName() + ";" );
-        imports.addImport( "import " + table.getPackage() + ".util."
-                + "DaoException;" );
+        if ( !table.getIndexList().isEmpty() )
+            imports.addImport( "import java.util.Map;" );
+        imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
+        imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
 
         write( imports.toString() );
     }
@@ -121,7 +117,14 @@ public class DaoGenerator extends Generator {
         write( TAB + "public " + table.getDomName() + " read( " );
         write( keyColumn.getFldType().toString() );
         write( " key ) throws DaoException;\n\n" );
+        if ( !table.getIndexList().isEmpty() ) {
+            writeCompoundKeys();
+        }
+    }
 
+    private void writeCompoundKeys() {
+        write( TAB + "public " + table.getDomName() + " readByIndex" );
+        write( "( Map<String, Object> map ) throws DaoException;\n\n" );
     }
 
     private void writeList() {
