@@ -312,10 +312,7 @@ public class XmlGenerator extends Generator {
             list.append( "#{" );
             list.append( javaVariables.get( i ) );
             list.append( "}" );
-            // if ( i % 5 == 4 ) {
-            // list.append( " ," );
-            // }
-            // else
+
             if ( i != javaVariables.size() - 1 ) {
                 list.append( " , " );
             }
