@@ -39,8 +39,6 @@ public class Tokenizer {
     private final String   SPECIAL  = "!*,()-?";
     private StringBuilder  sb       = new StringBuilder( "" );
     private int            holdPos;
-
-    // TODO: Need comment on what the purpose of readNext is...
     private boolean        readNext = true;
 
     public Tokenizer( BufferedReader bf ) {
