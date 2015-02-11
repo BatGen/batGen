@@ -62,7 +62,7 @@ public class ImportGenerator {
             String line = "";
 
             // find start of protected imports
-            while ( !line.contains( "import" ) ) {
+            while ( !line.startsWith( "import" ) ) {
                 line = br.readLine();
                 if ( line == null )
                     break;
@@ -88,19 +88,19 @@ public class ImportGenerator {
 
     public void addImport( String str ) {
 
-        if ( str.contains( "import javax" )
+        if ( str.startsWith( "import javax" )
                 && !importJavaxLines.contains( str + "\n" ) )
             importJavaxLines.add( str + "\n" );
 
-        else if ( str.contains( "import java" )
+        else if ( str.startsWith( "import java" )
                 && !importJavaLines.contains( str + "\n" ) )
             importJavaLines.add( str + "\n" );
 
-        else if ( str.contains( "import com" )
+        else if ( str.startsWith( "import com" )
                 && !importComLines.contains( str + "\n" ) )
             importComLines.add( str + "\n" );
 
-        else if ( str.contains( "import" )
+        else if ( str.startsWith( "import" )
                 && !importExternalLines.contains( str + "\n" )
                 && !importJavaxLines.contains( str + "\n" )
                 && !importJavaLines.contains( str + "\n" )
