@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-import org.batgen.generators.GenUtil;
 import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
+import org.batgen.generators.GenUtil;
 import org.batgen.generators.MybatisConfigGenerator;
 import org.batgen.generators.SessionFactoryGenerator;
 import org.batgen.generators.SqlGenerator;
@@ -69,8 +69,7 @@ public class BatGen {
 
         File file = new File( configPath );
         if ( file.exists() == false || file.isDirectory() == false ) {
-            throw new RuntimeException( configPath
-                    + " is not a valid directory." );
+            throw new RuntimeException( configPath + " is not a valid directory." );
         }
     }
 
@@ -93,8 +92,7 @@ public class BatGen {
     public void run() {
 
         System.out.println( "Press [Enter] to process all config files or "
-                + "enter a comma separate list of config files.\n\n"
-                + "Available Files: \n\n" + getList() + "\n\n" );
+                + "enter a comma separate list of config files.\n\n" + "Available Files: \n\n" + getList() + "\n\n" );
 
         Scanner scan = new Scanner( System.in );
         String userInput = scan.nextLine();
@@ -171,6 +169,9 @@ public class BatGen {
         for ( String file : files ) {
             table = parser.parse( file );
             table.setPackage( basePkg );
+            if(classNames.contains( table.getDomName() )){
+                throw new IllegalArgumentException( "This class name is used multiple times, " + table.getDomName() );
+            }
             classNames.add( table.getDomName() );
             generateAll( table );
         }
@@ -183,8 +184,7 @@ public class BatGen {
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
 
-        MybatisConfigGenerator mcg = new MybatisConfigGenerator( classNames,
-                basePkg, databaseType );
+        MybatisConfigGenerator mcg = new MybatisConfigGenerator( classNames, basePkg, databaseType );
         printPath( mcg.createConfiguration() );
 
         printPath( "sql/_CreateTables.sql" );
@@ -248,8 +248,7 @@ public class BatGen {
 
     protected String createForeignKeys() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser
-                .getForeignKeyList();
+        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser.getForeignKeyList();
         HashMap<String, Table> tableMap = Parser.getTableMap();
         boolean fromFieldExist = false;
         boolean toFieldExist = false;
@@ -283,16 +282,16 @@ public class BatGen {
                 if ( fromFieldExist && toFieldExist ) {
                     sb.append( "ALTER TABLE " + fromTable.getTableName() );
                     sb.append( " ADD FOREIGN KEY (" + fromField + ") " );
-                    sb.append( "REFERENCES " + toTable.getTableName() + "("
-                            + toField + ");\n" );
+                    sb.append( "REFERENCES " + toTable.getTableName() + "(" + toField + ");\n" );
                 }
                 else
-                    throw new IllegalArgumentException(
-                            "Either the field names are wrong or don't exist for foreign keys." );
+                    throw new IllegalArgumentException( "In Table" + node.getFromTable() + " and/or "
+                            + node.getToTable()
+                            + ", either the field names are wrong or don't exist for foreign keys." );
             }
             else
-                throw new IllegalArgumentException(
-                        "Either the tables names are wrong or don't exist for foreign keys." );
+                throw new IllegalArgumentException( "Either the tables names ( " + node.getFromTable() + " and/or "
+                        + node.getToTable() + " ) are wrong or don't exist for foreign keys." );
         }
 
         sb.append( "\n-- PROTECTED CODE -->" );
@@ -309,11 +308,9 @@ public class BatGen {
     private void printPath( String file ) {
         fileCount++;
         if ( file == null ) {
-            System.out.println( fileCount
-                    + ". MyBatis configuration already exists." );
+            System.out.println( fileCount + ". MyBatis configuration already exists." );
             return;
         }
-
         System.out.println( fileCount + ". " + file );
     }
 }
