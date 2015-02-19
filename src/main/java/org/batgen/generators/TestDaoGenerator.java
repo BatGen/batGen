@@ -23,11 +23,13 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.writeToFile;
+
+import java.util.Random;
+
 import org.batgen.Column;
 import org.batgen.LengthColumn;
 import org.batgen.Table;
-
-import static org.batgen.generators.GenUtil.*;
 
 public class TestDaoGenerator extends Generator {
 
@@ -304,7 +306,8 @@ public class TestDaoGenerator extends Generator {
                 continue;
             }
             else if ( column.getSqlType().equalsIgnoreCase( "DATE" )
-                    || column.getSqlType().equalsIgnoreCase( "BLOB" ) ) {
+                    || column.getSqlType().equalsIgnoreCase( "BLOB" )
+                    || column.getSqlType().equalsIgnoreCase( "CLOB" )) {
                 sb.append( TAB + TAB + "assertNotSame( "
                         + toJavaCase( variable ) + ".get"
                         + toCamelCase( column.getFldName() )
@@ -421,6 +424,10 @@ public class TestDaoGenerator extends Generator {
                     LengthColumn c = (LengthColumn) column;
                     sb.append( " randomString( \"" + column.getFldName()
                             + "\", " + c.getColLen() + " )" );
+                }
+                else if(column.getSqlType().equalsIgnoreCase( "CLOB" )){
+                    sb.append( " randomString( \"" + column.getFldName()
+                            + "\", " + (1 + (new Random()).nextInt( 10 )) + " )" );
                 }
             }
             else if ( column.getFldType().equalsIgnoreCase( "Date" ) ) {
