@@ -13,6 +13,7 @@ public enum FieldType {
     BOOLEAN ( "BOOLEAN", "boolean", "Boolean",   "NUMBER" ),
     DATE    ( "DATE",    "Date",    "Date",      "DATE" ),
     BLOB    ( "BLOB",    "byte[]",  "byte[]",    "BLOB" ),
+    CLOB    ( "CLOB",    "String",  "String",    "CLOB" ),
     STRING  ( "STRING",  "String",  "String",    "VARCHAR2" ),
     TIMESTAMP ("TIMESTAMP",  "Date",  "Date",    "TIMESTAMP");
 
