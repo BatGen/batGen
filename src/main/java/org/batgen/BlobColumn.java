@@ -28,6 +28,6 @@ public class BlobColumn extends LengthColumn {
 
     @Override
     public void setKey() {
-        throw new RuntimeException( "BLOB column cannot be a key." );
+        throw new RuntimeException( "BLOB/CLOB column cannot be a key." );
     }
 }
