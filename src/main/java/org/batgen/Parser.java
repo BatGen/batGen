@@ -253,6 +253,11 @@ public class Parser {
             column.setType( FieldType.BLOB );
             token = getNextToken();
         }
+        else if ( token.equals( FieldType.CLOB ) ) {
+            column = new BlobColumn();
+            column.setType( FieldType.CLOB );
+            token = getNextToken();
+        }
         else {
             column = getLengthColumn( token );
             token = getNextToken();
