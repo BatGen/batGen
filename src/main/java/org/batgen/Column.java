@@ -66,8 +66,7 @@ public class Column {
 
     public String getFldType() {
         if ( type == null )
-            throw new IllegalStateException( "type was never assigned for: "
-                    + table.getDomName() + "." + colName );
+            throw new IllegalStateException( "type was never assigned for: " + table.getDomName() + "." + colName );
         return type.getWrapperType();
     }
 
@@ -121,9 +120,8 @@ public class Column {
 
     @Override
     public String toString() {
-        return "Column [fldName=" + fldName + ", colName=" + colName
-                + ", fldType=" + getFldType() + ", colType=" + getSqlType()
-                + ", comment=" + comment + ", required=" + isRequired()
-                + ", key=" + isKey() + "searchable=" + isSearchId() + "]";
+        return "Column: fldName=" + fldName + ", colName=" + colName + ", fldType=" + getFldType() + ", colType="
+                + getSqlType() + ", comment=" + comment + ", required=" + isRequired() + ", key=" + isKey()
+                + ", sequenceDisable=" + isSequenceDisabled() + ", searchable=" + isSearchId();
     }
 }
