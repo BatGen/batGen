@@ -143,12 +143,12 @@ public class XmlGenerator extends Generator {
         sb.append( TAB + "<insert id=\"create\" parameterType=\"" + table.getPackage() + ".domain."
                 + table.getDomName() + "\">\n" );
 
-        //
-        if ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) )
-                && !table.getColumn( 0 ).isSequenceDisabled() ) {
+        // if the 1st column does not have: sequence disabled, and (string and key)
+
+        if ( !table.getColumn( 0 ).isSequenceDisabled()
+                && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
             sb.append( TAB + TAB + "<selectKey resultType=\"_" + table.getColumn( 0 ).getFldType().toLowerCase()
                     + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName() + "\" order=\"BEFORE\">\n" );
-
             switch ( databaseType ) {
             case H2:
             case ORACLE:
@@ -161,8 +161,8 @@ public class XmlGenerator extends Generator {
             }
 
             sb.append( TAB + TAB + "</selectKey>\n" );
+
         }
-        //
 
         sb.append( TAB + TAB + "insert into " + table.getTableName().toUpperCase() + "\n" );
         sb.append( TAB + TAB + "(\n" );
