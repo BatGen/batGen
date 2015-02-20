@@ -41,11 +41,7 @@ public class LengthColumn extends Column {
 
     @Override
     public String toString() {
-        return "Column [fldName=" + getFldName() + ", colName=" + getColName()
-                + ", fldType=" + getFldType() + ", colType=" + getSqlType()
-                + ", comment=" + getComments() +", required=" + isRequired()
-                + ", key=" + isKey() + "searchable=" + isSearchId()
-                + ", colLen= " + colLen + "]";
+        return super.toString() + ", colLen= " + colLen;
     }
 
 }
