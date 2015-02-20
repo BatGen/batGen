@@ -35,11 +35,6 @@ public class DoubleColumn extends LengthColumn {
     }
 
     public String toString() {
-        return "Column [fldName=" + getFldName() + ", colName=" + getColName()
-                + ", fldType=" + getFldType() + ", colType=" + getSqlType()
-                + ", comment=" + getComments() + ", required=" + isRequired()
-                + ", key=" + isKey() + "searchable=" + isSearchId()
-                + ", colLen= " + getColLen() + ", precision=" + precision + "]";
-
+        return super.toString() + ", precision=" + precision;
     }
 }
