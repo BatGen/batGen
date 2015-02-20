@@ -123,6 +123,9 @@ public class Table {
         keyCol.setFldName( "key" );
         keyCol.setKey();
         keyCol.setColLen( "10" );
+        if(columns.get( 0 ).isSequenceDisabled()){
+            keyCol.setSequenceDisabled();
+        }
 
         columns.add( 0, keyCol );
     }
