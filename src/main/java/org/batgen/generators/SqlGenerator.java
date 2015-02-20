@@ -23,6 +23,8 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.writeToFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +36,6 @@ import org.batgen.IndexNode;
 import org.batgen.LengthColumn;
 import org.batgen.Table;
 
-import static org.batgen.generators.GenUtil.*;
-
 public class SqlGenerator extends Generator {
 
     private final int       SPACE     = 18;
@@ -43,6 +43,7 @@ public class SqlGenerator extends Generator {
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
     private List<String>    fieldList = new ArrayList<String>();
     private List<String>    keyList   = new ArrayList<String>();
+    private boolean buildSequence;
 
     public SqlGenerator( Table table ) {
         super( table );
@@ -51,6 +52,7 @@ public class SqlGenerator extends Generator {
     }
 
     public String createSql() {
+        buildSequence = sequenceDisabled();
         StringBuilder sb = new StringBuilder();
         String table = writeColumns();
 
@@ -130,7 +132,9 @@ public class SqlGenerator extends Generator {
 
         sb.append( ");\n" );
 
-        sb.append( "\nCREATE SEQUENCE " + table.getTableName() + "_SEQ;\n" );
+        if(buildSequence){
+            sb.append( "\nCREATE SEQUENCE " + table.getTableName() + "_SEQ;\n" );
+        }
 
         sb.append( writeIndexes() );
 
@@ -183,8 +187,12 @@ public class SqlGenerator extends Generator {
     }
 
     private String drop() {
-        return "DROP TABLE " + table.getTableName() + ";\nDROP SEQUENCE "
-                + table.getTableName() + "_SEQ;\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append( "DROP TABLE " + table.getTableName() + ";\n" );
+        if(buildSequence){
+            sb.append( "DROP SEQUENCE " + table.getTableName() + "_SEQ;\n");
+        }
+        return sb.toString();
     }
 
     private String messageRemove() {
@@ -197,5 +205,13 @@ public class SqlGenerator extends Generator {
 
     private String messageSample() {
         return "\n-- Sample Select Statement\n\n";
+    }
+    
+    private boolean sequenceDisabled(){
+        if ( !table.getColumn( 0 ).isSequenceDisabled()
+                && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
+            return true;
+        }
+        return false;
     }
 }
