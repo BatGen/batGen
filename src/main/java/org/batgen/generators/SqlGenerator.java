@@ -35,6 +35,7 @@ import org.batgen.DoubleColumn;
 import org.batgen.IndexNode;
 import org.batgen.LengthColumn;
 import org.batgen.Table;
+import org.batgen.VirtualStringColumn;
 
 public class SqlGenerator extends Generator {
 
@@ -43,7 +44,7 @@ public class SqlGenerator extends Generator {
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
     private List<String>    fieldList = new ArrayList<String>();
     private List<String>    keyList   = new ArrayList<String>();
-    private boolean buildSequence;
+    private boolean         buildSequence;
 
     public SqlGenerator( Table table ) {
         super( table );
@@ -79,8 +80,7 @@ public class SqlGenerator extends Generator {
         for ( Column column : table.getColumns() ) {
 
             String name = column.getClass().getSimpleName();
-            sb.append( "    " + column.getColName().toUpperCase()
-                    + makeSpace( SPACE, column.getColName() ) );
+            sb.append( "    " + column.getColName().toUpperCase() + makeSpace( SPACE, column.getColName() ) );
 
             if ( name.equals( "BlobColumn" ) ) {
                 BlobColumn c = (BlobColumn) column;
@@ -92,25 +92,25 @@ public class SqlGenerator extends Generator {
             else if ( name.equals( "LengthColumn" ) ) {
                 LengthColumn c = (LengthColumn) column;
                 if ( c.getColLen() != null ) {
-                    if ( column.getSqlType().equals( "CHAR" ) ) {
-                        sb.append( column.getSqlType() );
-                    }
-                    else {
-                        sb.append( column.getSqlType() + "(" + c.getColLen()
-                                + ")" );
-                    }
+                    sb.append( column.getSqlType() + "(" + c.getColLen() + ")" );
                 }
             }
             else if ( name.equals( "DoubleColumn" ) ) {
                 DoubleColumn c = (DoubleColumn) column;
                 if ( c.getColLen() != null ) {
-                    sb.append( column.getSqlType() + "(" + (Integer.parseInt(c.getColLen()) + Integer.parseInt(c.getPrecision())) + ","
+                    sb.append( column.getSqlType() + "("
+                            + ( Integer.parseInt( c.getColLen() ) + Integer.parseInt( c.getPrecision() ) ) + ","
                             + c.getPrecision() + ")" );
                 }
             }
             else if ( name.equals( "Column" ) ) {
                 Column c = column;
                 sb.append( c.getSqlType() );
+            }
+            else if ( name.equals( "VirtualStringColumn" ) ) {
+                VirtualStringColumn c = (VirtualStringColumn) column;
+                sb.append( column.getSqlType() + "(" + c.getColLen() + ") as (" );
+                sb.append( c.getSqlCommand() + ")" );
             }
             if ( column.isRequired() ) {
                 sb.append( " NOT NULL" );
@@ -122,8 +122,7 @@ public class SqlGenerator extends Generator {
             sb.append( ",\n" );
         }
 
-        sb.append( "    CONSTRAINT " + table.getTableName()
-                + "_PK PRIMARY KEY ( " );
+        sb.append( "    CONSTRAINT " + table.getTableName() + "_PK PRIMARY KEY ( " );
         for ( String key : keyList ) {
             sb.append( key.toUpperCase() + ", " );
         }
@@ -132,7 +131,7 @@ public class SqlGenerator extends Generator {
 
         sb.append( ");\n" );
 
-        if(buildSequence){
+        if ( buildSequence ) {
             sb.append( "\nCREATE SEQUENCE " + table.getTableName() + "_SEQ;\n" );
         }
 
@@ -163,21 +162,17 @@ public class SqlGenerator extends Generator {
         sb.append( "SELECT\n    " );
 
         for ( int i = 0; i < table.getColumns().size(); i++ ) {
-            if ( !"ListColumn".equals( table.getColumn( i ).getClass()
-                    .getSimpleName() ) ) {
-                sb.append( table.getColumn( i ).getColName().toUpperCase()
-                        + ", " );
+            if ( !"ListColumn".equals( table.getColumn( i ).getClass().getSimpleName() ) ) {
+                sb.append( table.getColumn( i ).getColName().toUpperCase() + ", " );
             }
         }
 
         sb.deleteCharAt( sb.length() - 2 );
         if ( keyList.isEmpty() ) {
-            sb.append( "\nfrom " + table.getTableName()
-                    + "\nWHERE\n    KEY = 0;\n" );
+            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    KEY = 0;\n" );
         }
         else {
-            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    "
-                    + keyList.get( 0 ) + " = 0;\n" );
+            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    " + keyList.get( 0 ) + " = 0;\n" );
         }
         return sb.toString();
     }
@@ -189,8 +184,8 @@ public class SqlGenerator extends Generator {
     private String drop() {
         StringBuilder sb = new StringBuilder();
         sb.append( "DROP TABLE " + table.getTableName() + ";\n" );
-        if(buildSequence){
-            sb.append( "DROP SEQUENCE " + table.getTableName() + "_SEQ;\n");
+        if ( buildSequence ) {
+            sb.append( "DROP SEQUENCE " + table.getTableName() + "_SEQ;\n" );
         }
         return sb.toString();
     }
@@ -206,8 +201,8 @@ public class SqlGenerator extends Generator {
     private String messageSample() {
         return "\n-- Sample Select Statement\n\n";
     }
-    
-    private boolean sequenceDisabled(){
+
+    private boolean sequenceDisabled() {
         if ( !table.getColumn( 0 ).isSequenceDisabled()
                 && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
             return true;
