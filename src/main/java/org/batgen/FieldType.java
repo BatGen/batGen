@@ -15,7 +15,8 @@ public enum FieldType {
     BLOB    ( "BLOB",    "byte[]",  "byte[]",    "BLOB" ),
     CLOB    ( "CLOB",    "String",  "String",    "CLOB" ),
     STRING  ( "STRING",  "String",  "String",    "VARCHAR2" ),
-    TIMESTAMP ("TIMESTAMP",  "Date",  "Date",    "TIMESTAMP");
+    TIMESTAMP ("TIMESTAMP",  "Date",  "Date",    "TIMESTAMP"),
+    VSTRING  ( "VSTRING",  "String",  "String",    "VARCHAR2" );
 
     private String name;
     private String primativeType;
