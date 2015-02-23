@@ -98,8 +98,10 @@ public class XmlGenerator extends Generator {
             string.append( TAB + TAB + "<result column =\"" + table.getColumn( i ).getColName().toUpperCase() + "\" " );
             string.append( makeSpace( columnSpace, string.toString() ) );
             string.append( "property = \"" + table.getColumn( i ).getFldName() + "\" />" );
-            sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
-            javaVariables.add( table.getColumn( i ).getFldName() );
+            if ( !table.getColumn( i ).getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
+                sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
+                javaVariables.add( table.getColumn( i ).getFldName() );
+            }
 
             sb.append( "\n" + string.toString() );
 
@@ -143,7 +145,8 @@ public class XmlGenerator extends Generator {
         sb.append( TAB + "<insert id=\"create\" parameterType=\"" + table.getPackage() + ".domain."
                 + table.getDomName() + "\">\n" );
 
-        // if the 1st column does not have: sequence disabled, and (string and key)
+        // if the 1st column does not have: sequence disabled, and (string and
+        // key)
 
         if ( !table.getColumn( 0 ).isSequenceDisabled()
                 && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
@@ -263,6 +266,9 @@ public class XmlGenerator extends Generator {
     }
 
     private String createCompoundKeys() {
+        if ( table.getIndexList().isEmpty() ) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
@@ -291,10 +297,6 @@ public class XmlGenerator extends Generator {
             case ORACLE:
                 list.append( sqlVariables.get( i ) );
             }
-            // if ( i % 5 == 4 ) {
-            // list.append( " ," );
-            // }
-            // else
             if ( i != sqlVariables.size() - 1 ) {
                 list.append( " , " );
             }
