@@ -23,33 +23,32 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.writeToFile;
+
 import org.batgen.Column;
 import org.batgen.FieldType;
 import org.batgen.Table;
-
-import static org.batgen.generators.GenUtil.*;
 
 /**
  * Generates the domain classes
  * 
  */
 public class DomainGenerator extends Generator {
-    private StringBuilder sb = new StringBuilder();
-    private StringBuilder flds = new StringBuilder();
-    private StringBuilder getsSets = new StringBuilder();
-    boolean date;
+    private StringBuilder sb          = new StringBuilder();
+    private StringBuilder flds        = new StringBuilder();
+    private StringBuilder getsSets    = new StringBuilder();
+    boolean               date;
 
-    private final int FLD_SPACE = 9;
-    private final String SPACE = "    ";
-    private final int PUB_SPACE = 9;
-    private final String IMPORT_DATE = "import java.util.Date;";
+    private final int     FLD_SPACE   = 9;
+    private final String  SPACE       = "    ";
+    private final int     PUB_SPACE   = 9;
+    private final String  IMPORT_DATE = "import java.util.Date;";
 
-    private String filePath;
+    private String        filePath;
 
     public DomainGenerator( Table table ) {
         super( table );
-        filePath = "src/main/java/" + packageToPath() + "/domain/" + domName
-                + ".java";
+        filePath = "src/main/java/" + packageToPath() + "/domain/" + domName + ".java";
     }
 
     public String createDomain() {
@@ -77,14 +76,13 @@ public class DomainGenerator extends Generator {
         sb.append( getsSets );
 
         sb.append( getProtectedJavaLines( filePath ) );
-
         writeToFile( filePath, sb.toString() );
 
         return filePath;
     }
 
     private void writeComment() {
-        if (comment == null){
+        if ( comment == null ) {
             sb.append( "" );
         }
         else
@@ -134,6 +132,9 @@ public class DomainGenerator extends Generator {
     }
 
     private String writeSet( Column col ) {
+        if ( col.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
+            return "";
+        }
         StringBuilder str = new StringBuilder();
 
         str.append( SPACE );
