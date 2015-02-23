@@ -42,8 +42,7 @@ public class TestDaoGenerator extends Generator {
     public TestDaoGenerator( Table table ) {
         super( table );
         this.daoName = "Test" + table.getDomName() + "Dao";
-        filePath = "src/test/java/" + packageToPath() + "/dao/" + daoName
-                + ".java";
+        filePath = "src/test/java/" + packageToPath() + "/dao/" + daoName + ".java";
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
                 keyName = table.getColumn( 0 ).getFldName();
@@ -108,8 +107,7 @@ public class TestDaoGenerator extends Generator {
     private String createStaticVariables() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( TAB
-                + "private static StringBuilder sb = new StringBuilder();\n" );
+        sb.append( TAB + "private static StringBuilder sb = new StringBuilder();\n" );
         sb.append( TAB
                 + "private static String chars = \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\";\n" );
         sb.append( TAB + "private static Random random = new Random();\n" );
@@ -127,12 +125,9 @@ public class TestDaoGenerator extends Generator {
 
         sb.append( "\n" + TAB + "@Test\n" );
         sb.append( TAB + "public void test() throws Exception {\n" );
-        sb.append( "\n" + TAB + TAB
-                + "SqlSession session = SessionFactory.getSession();\n" );
-        sb.append( TAB + TAB + table.getDomName() + "Dao "
-                + toJavaCase( table.getDomName() )
-                + "Dao = session.getMapper( " + table.getDomName()
-                + "Dao.class );\n" );
+        sb.append( "\n" + TAB + TAB + "SqlSession session = SessionFactory.getSession();\n" );
+        sb.append( TAB + TAB + table.getDomName() + "Dao " + toJavaCase( table.getDomName() )
+                + "Dao = session.getMapper( " + table.getDomName() + "Dao.class );\n" );
         sb.append( "\n" + TAB + TAB + "try {\n" );
         sb.append( getCreate( table.getDomName() ) );
         sb.append( getRead( table.getDomName() ) );
@@ -147,8 +142,8 @@ public class TestDaoGenerator extends Generator {
         sb.append( "\n" + TAB + TAB + "} finally {\n" );
         sb.append( TAB + TAB + TAB + "if ( session != null ) {\n" );
         sb.append( TAB + TAB + TAB + TAB + "session.rollback();\n" );
-        sb.append( TAB + TAB + TAB + TAB + "session.close();\n" + TAB + TAB
-                + TAB + "}\n" + TAB + TAB + "}\n" + TAB + "}\n" );
+        sb.append( TAB + TAB + TAB + TAB + "session.close();\n" + TAB + TAB + TAB + "}\n" + TAB + TAB + "}\n" + TAB
+                + "}\n" );
 
         return sb.toString();
     }
@@ -156,19 +151,16 @@ public class TestDaoGenerator extends Generator {
     private String getCreate( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB + TAB + TAB + variable + " "
-                + toJavaCase( variable ) + " = Test" + variable + "Dao.create"
-                + variable + "();\n" );
+        sb.append( "\n" + TAB + TAB + TAB + variable + " " + toJavaCase( variable ) + " = Test" + variable
+                + "Dao.create" + variable + "();\n" );
 
         if ( !getCreatedCalled ) {
-            sb.append( "\n" + TAB + TAB + TAB + "int count = "
-                    + toJavaCase( variable ) + "Dao.create( "
+            sb.append( "\n" + TAB + TAB + TAB + "int count = " + toJavaCase( variable ) + "Dao.create( "
                     + toJavaCase( variable ) + " );\n" );
             getCreatedCalled = true;
         }
         else {
-            sb.append( "\n" + TAB + TAB + TAB + "count = "
-                    + toJavaCase( variable ) + "Dao.create( "
+            sb.append( "\n" + TAB + TAB + TAB + "count = " + toJavaCase( variable ) + "Dao.create( "
                     + toJavaCase( variable ) + " );\n" );
         }
 
@@ -182,40 +174,34 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         if ( countRead == 0 ) {
-            sb.append( "\n" + TAB + TAB + TAB + variable + " readRecord = "
-                    + toJavaCase( variable ) + "Dao.read( "
+            sb.append( "\n" + TAB + TAB + TAB + variable + " readRecord = " + toJavaCase( variable ) + "Dao.read( "
                     + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
-            sb.append( TAB + TAB + TAB
-                    + getNotNullEquals( "readRecord", variable ) );
+            sb.append( TAB + TAB + TAB + getNotNullEquals( "readRecord", variable ) );
 
             if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
                 countRead++;
             }
         }
         else if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
-            sb.append( "\n" + TAB + TAB + TAB + "readRecord = "
-                    + toJavaCase( variable ) + "Dao.read( "
+            sb.append( "\n" + TAB + TAB + TAB + "readRecord = " + toJavaCase( variable ) + "Dao.read( "
                     + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
-            sb.append( TAB + TAB + TAB
-                    + getNotNullEquals( "readRecord", variable ) );
+            sb.append( TAB + TAB + TAB + getNotNullEquals( "readRecord", variable ) );
         }
 
         return sb.toString();
     }
 
     private String getCompareRecord( String variable ) {
-        return "\n" + TAB + TAB + TAB + "compareRecords( "
-                + toJavaCase( variable ) + ", readRecord );\n";
+        return "\n" + TAB + TAB + TAB + "compareRecords( " + toJavaCase( variable ) + ", readRecord );\n";
     }
 
     private String getModifyRecord( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB + TAB + TAB + "modifyRecord( "
-                + toJavaCase( variable ) + " );\n" );
+        sb.append( "\n" + TAB + TAB + TAB + "modifyRecord( " + toJavaCase( variable ) + " );\n" );
 
-        sb.append( TAB + TAB + TAB + "count = " + toJavaCase( variable )
-                + "Dao.update( " + toJavaCase( variable ) + " );\n" );
+        sb.append( TAB + TAB + TAB + "count = " + toJavaCase( variable ) + "Dao.update( " + toJavaCase( variable )
+                + " );\n" );
         sb.append( TAB + TAB + TAB + getAssertEquals() );
 
         return sb.toString();
@@ -224,9 +210,8 @@ public class TestDaoGenerator extends Generator {
     private String getDeleteRecord( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB + TAB + TAB + "count = " + toJavaCase( variable )
-                + "Dao.delete( " + toJavaCase( variable ) + ".get" + keyName
-                + "() );\n" );
+        sb.append( "\n" + TAB + TAB + TAB + "count = " + toJavaCase( variable ) + "Dao.delete( "
+                + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
         sb.append( TAB + TAB + TAB + getAssertEquals() );
 
         return sb.toString();
@@ -236,18 +221,15 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
-            sb.append( "\n" + TAB + TAB + TAB + "readRecord = "
-                    + toJavaCase( variable ) + "Dao.read( "
+            sb.append( "\n" + TAB + TAB + TAB + "readRecord = " + toJavaCase( variable ) + "Dao.read( "
                     + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
             sb.append( TAB + TAB + TAB + getNullEquals( "readRecord" ) );
 
         }
         else {
-            sb.append( "\n" + TAB + TAB + TAB + "readRecord" + countDelete
-                    + " = " + toJavaCase( variable ) + "Dao.read( "
-                    + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
-            sb.append( TAB + TAB + TAB
-                    + getNullEquals( "readRecord" + countDelete ) );
+            sb.append( "\n" + TAB + TAB + TAB + "readRecord" + countDelete + " = " + toJavaCase( variable )
+                    + "Dao.read( " + toJavaCase( variable ) + ".get" + keyName + "() );\n" );
+            sb.append( TAB + TAB + TAB + getNullEquals( "readRecord" + countDelete ) );
             countDelete++;
         }
 
@@ -259,19 +241,14 @@ public class TestDaoGenerator extends Generator {
         if ( hasSearch ) {
             for ( int i = 1; i < searchList.size() + 1; i++ ) {
 
-                sb.append( "\n" + TAB + TAB + TAB + "List<" + variable
-                        + "> list" + i + "= " );
-                sb.append( toJavaCase( variable ) + "Dao.getListBy"
-                        + toTitleCase( searchList.get( i - 1 ) ) );
-                sb.append( "( " + toJavaCase( variable ) + ".get"
-                        + toTitleCase( searchList.get( i - 1 ) ) );
+                sb.append( "\n" + TAB + TAB + TAB + "List<" + variable + "> list" + i + "= " );
+                sb.append( toJavaCase( variable ) + "Dao.getListBy" + toTitleCase( searchList.get( i - 1 ) ) );
+                sb.append( "( " + toJavaCase( variable ) + ".get" + toTitleCase( searchList.get( i - 1 ) ) );
                 sb.append( "() ) ; \n" );
 
-                sb.append( TAB + TAB + TAB + "assertEquals( 1, list" + i
-                        + ".size() );\n" );
+                sb.append( TAB + TAB + TAB + "assertEquals( 1, list" + i + ".size() );\n" );
 
-                sb.append( TAB + TAB + TAB + "compareRecords( "
-                        + toJavaCase( variable ) );
+                sb.append( TAB + TAB + TAB + "compareRecords( " + toJavaCase( variable ) );
                 sb.append( ", list" + i + ".get( 0 ) );\n" );
 
             }
@@ -282,14 +259,11 @@ public class TestDaoGenerator extends Generator {
     private String createMethod( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB + "public static " + variable + " create"
-                + variable + "() {\n" );
+        sb.append( "\n" + TAB + "public static " + variable + " create" + variable + "() {\n" );
 
-        sb.append( TAB + TAB + variable + " " + toJavaCase( variable )
-                + " = new " + variable + "();\n\n" );
+        sb.append( TAB + TAB + variable + " " + toJavaCase( variable ) + " = new " + variable + "();\n\n" );
         sb.append( getColumnContextSet( variable ) );
-        sb.append( "\n" + TAB + TAB + "return " + toJavaCase( variable )
-                + ";\n" + TAB + "}" );
+        sb.append( "\n" + TAB + TAB + "return " + toJavaCase( variable ) + ";\n" + TAB + "}" );
 
         return sb.toString();
     }
@@ -297,29 +271,24 @@ public class TestDaoGenerator extends Generator {
     private String createCompareRecordsMethod( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n\n" + TAB + "public static void compareRecords( "
-                + variable + " " + toJavaCase( variable ) + ", " + variable
-                + " readRecord ) {\n\n" );
+        sb.append( "\n\n" + TAB + "public static void compareRecords( " + variable + " " + toJavaCase( variable )
+                + ", " + variable + " readRecord ) {\n\n" );
 
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
                 continue;
             }
-            else if ( column.getSqlType().equalsIgnoreCase( "DATE" )
-                    || column.getSqlType().equalsIgnoreCase( "BLOB" )
-                    || column.getSqlType().equalsIgnoreCase( "CLOB" )) {
-                sb.append( TAB + TAB + "assertNotSame( "
-                        + toJavaCase( variable ) + ".get"
-                        + toCamelCase( column.getFldName() )
-                        + "(), readRecord.get"
-                        + toCamelCase( column.getFldName() ) + "() );\n" );
+            else if ( column.getSqlType().equalsIgnoreCase( "DATE" ) || column.getSqlType().equalsIgnoreCase( "BLOB" )
+                    || column.getSqlType().equalsIgnoreCase( "CLOB" ) ) {
+                sb.append( TAB + TAB + "assertNotSame( " + toJavaCase( variable ) + ".get"
+                        + toCamelCase( column.getFldName() ) + "(), readRecord.get" + toCamelCase( column.getFldName() )
+                        + "() );\n" );
 
             }
             else {
-                sb.append( TAB + TAB + "assertEquals( " + toJavaCase( variable )
-                        + ".get" + toCamelCase( column.getFldName() )
-                        + "(), readRecord.get"
-                        + toCamelCase( column.getFldName() ) + "() );\n" );
+                sb.append( TAB + TAB + "assertEquals( " + toJavaCase( variable ) + ".get"
+                        + toCamelCase( column.getFldName() ) + "(), readRecord.get" + toCamelCase( column.getFldName() )
+                        + "() );\n" );
 
             }
         }
@@ -330,8 +299,8 @@ public class TestDaoGenerator extends Generator {
 
     private String createModifyRecordsMethod( String variable ) {
         StringBuilder sb = new StringBuilder();
-        sb.append( "\n" + TAB + "public static void modifyRecord( " + variable
-                + " " + toJavaCase( variable ) + " ) {\n\n" );
+        sb.append( "\n" + TAB + "public static void modifyRecord( " + variable + " " + toJavaCase( variable )
+                + " ) {\n\n" );
 
         sb.append( getColumnContextSet( variable ) );
         sb.append( "\n" + TAB + "}\n" );
@@ -343,8 +312,7 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + "public static int randomNumber() {\n\n" );
-        sb.append( TAB + "" + TAB
-                + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
+        sb.append( TAB + "" + TAB + "return (int) ( Math.random() * 10 ) + 0;\n\n" );
         sb.append( TAB + "}\n" );
 
         return sb.toString();
@@ -353,20 +321,14 @@ public class TestDaoGenerator extends Generator {
     private String createRandomString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n"
-                + TAB
-                + "public static String randomString( String fldName, int length ) {\n\n" );
+        sb.append( "\n" + TAB + "public static String randomString( String fldName, int length ) {\n\n" );
         sb.append( TAB + TAB + "if ( fldName.length() >= length ) {\n" );
         sb.append( TAB + TAB + TAB + "return fldName.substring( 0, length );\n" );
         sb.append( TAB + TAB + "}\n\n" );
         sb.append( TAB + TAB + "sb.setLength( 0 );\n" );
         sb.append( TAB + TAB + "sb.append( fldName );\n" );
-        sb.append( TAB + TAB
-                + "for ( int i = fldName.length(); i < length; i++ ) {\n" );
-        sb.append( TAB
-                + TAB
-                + TAB
-                + "sb.append( chars.charAt( random.nextInt( chars.length() ) ) );\n" );
+        sb.append( TAB + TAB + "for ( int i = fldName.length(); i < length; i++ ) {\n" );
+        sb.append( TAB + TAB + TAB + "sb.append( chars.charAt( random.nextInt( chars.length() ) ) );\n" );
         sb.append( TAB + TAB + "}\n" );
         sb.append( TAB + TAB + "return sb.toString();\n" );
         sb.append( TAB + "}\n" );
@@ -377,8 +339,7 @@ public class TestDaoGenerator extends Generator {
     private String createRandomByte() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB
-                + "public static byte[] randomByteArray( int length ) {\n\n" );
+        sb.append( "\n" + TAB + "public static byte[] randomByteArray( int length ) {\n\n" );
         sb.append( TAB + TAB + "byte[] byteArray = new byte[length];\n" );
         sb.append( TAB + TAB + "random.nextBytes( byteArray );\n" );
         sb.append( TAB + TAB + "return byteArray;\n" );
@@ -391,17 +352,18 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         for ( Column column : table.getColumns() ) {
+            if ( column.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
+                continue;
+            }
+
             if ( column.getColName().equalsIgnoreCase( "Key" ) ) {
                 if ( column.getFldType().equalsIgnoreCase( "string" ) ) {
                     countLoop++;
-                    if ( column.getClass().getSimpleName()
-                            .equals( "LengthColumn" )
-                            && ( !( countLoop % 2 == 0 ) ) ) {
+                    if ( column.getClass().getSimpleName().equals( "LengthColumn" ) && ( !( countLoop % 2 == 0 ) ) ) {
                         LengthColumn c = (LengthColumn) column;
-                        sb.append( TAB + TAB + toJavaCase( variable ) + ".set"
-                                + toCamelCase( column.getFldName() ) + "( " );
-                        sb.append( " randomString( \"" + column.getFldName()
-                                + "\", " + c.getColLen() + " ) );\n" );
+                        sb.append( TAB + TAB + toJavaCase( variable ) + ".set" + toCamelCase( column.getFldName() )
+                                + "( " );
+                        sb.append( " randomString( \"" + column.getFldName() + "\", " + c.getColLen() + " ) );\n" );
 
                     }
                     else {
@@ -413,8 +375,7 @@ public class TestDaoGenerator extends Generator {
                 }
             }
 
-            sb.append( TAB + TAB + toJavaCase( variable ) + ".set"
-                    + toCamelCase( column.getFldName() ) + "(" );
+            sb.append( TAB + TAB + toJavaCase( variable ) + ".set" + toCamelCase( column.getFldName() ) + "(" );
 
             if ( column.getFldType().equalsIgnoreCase( "Boolean" ) ) {
                 sb.append( " true " );
@@ -422,12 +383,11 @@ public class TestDaoGenerator extends Generator {
             else if ( column.getFldType().equalsIgnoreCase( "String" ) ) {
                 if ( column.getClass().getSimpleName().equals( "LengthColumn" ) ) {
                     LengthColumn c = (LengthColumn) column;
-                    sb.append( " randomString( \"" + column.getFldName()
-                            + "\", " + c.getColLen() + " )" );
+                    sb.append( " randomString( \"" + column.getFldName() + "\", " + c.getColLen() + " )" );
                 }
-                else if(column.getSqlType().equalsIgnoreCase( "CLOB" )){
-                    sb.append( " randomString( \"" + column.getFldName()
-                            + "\", " + (1 + (new Random()).nextInt( 10 )) + " )" );
+                else if ( column.getSqlType().equalsIgnoreCase( "CLOB" ) ) {
+                    sb.append( " randomString( \"" + column.getFldName() + "\", "
+                            + ( 1 + ( new Random() ).nextInt( 10 ) ) + " )" );
                 }
             }
             else if ( column.getFldType().equalsIgnoreCase( "Date" ) ) {
@@ -467,8 +427,7 @@ public class TestDaoGenerator extends Generator {
     }
 
     private String getNotNullEquals( String variable, String type ) {
-        return "assertNotNull( " + toJavaCase( variable ) + ".get" + keyName
-                + "() );\n";
+        return "assertNotNull( " + toJavaCase( variable ) + ".get" + keyName + "() );\n";
     }
 
     private String getNullEquals( String variable ) {
