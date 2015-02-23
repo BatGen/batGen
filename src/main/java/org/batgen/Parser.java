@@ -31,6 +31,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A reusable parser class. You can instantiate once and run parse() on multiple
@@ -39,7 +40,7 @@ import java.util.List;
 public class Parser {
     private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
     private static List<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
-    private List<String>                  varList      = new ArrayList<String>();
+    private List<String>                  varList        = new ArrayList<String>();
     private List<String>                  fieldList      = new ArrayList<String>();
 
     private String                        fileName;
@@ -258,14 +259,40 @@ public class Parser {
             column.setType( FieldType.CLOB );
             token = getNextToken();
         }
+        else if ( token.equals( FieldType.VSTRING ) ) {
+            column = getVirtualColumn( token );
+            token = getNextToken();
+        }
         else {
             column = getLengthColumn( token );
             token = getNextToken();
         }
 
+        // parse the rest of the line
         parseColumnEnd( column, token );
         table.addColumn( column );
 
+    }
+
+    private Column getVirtualColumn( Token token ) {
+        VirtualStringColumn column = new VirtualStringColumn();
+        column.setType( FieldType.VSTRING );
+
+        token = getNextToken();
+        if ( !token.isOpenParen() )
+            throwException( "Expecting open parenthesis" );
+
+        token = getNextToken();
+        if ( !token.isNumeric() )
+            throwException( "Numeric length expected." );
+
+        column.setColLen( token.getValue() );
+
+        token = getNextToken();
+        if ( !token.isCloseParen() )
+            throwException( "Expecting close paren." );
+
+        return column;
     }
 
     private Column getLengthColumn( Token token ) {
@@ -284,12 +311,12 @@ public class Parser {
             column.setType( FieldType.TIMESTAMP );
         }
         else {
-            throwException( "Unhandled Type. Expected DOUBLE, STRING, LONG, INTEGER, BLOB, BOOLEAN or DATE" );
+            throwException( "Unhandled Type. Expected DOUBLE, STRING, LONG, INTEGER, BLOB, CLOB, BOOLEAN, DATE or VSTRING.");
         }
 
         token = getNextToken();
         if ( !token.isOpenParen() )
-            throwException( "Expecting open paren." );
+            throwException( "Expecting open parenthesis" );
 
         token = getNextToken();
         if ( !token.isNumeric() )
@@ -328,6 +355,16 @@ public class Parser {
             }
             else if ( token.isComment() ) {
                 column.setComment( token.getValue() );
+                //parse the sql command from comment if it's an virtual column
+                if ( column.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
+                    Pattern spaces = Pattern.compile("`");
+                    String parts[] = spaces.split(token.getValue());
+                    if(parts.length == 1){
+                        throwException( "Expecting `sql statement`." );
+                    }
+                    ( (VirtualStringColumn) column ).setSqlCommand(parts[1]);
+                }
+
             }
             else if ( token.isSearchId() ) {
                 column.setSearchId();
@@ -369,11 +406,11 @@ public class Parser {
                     }
                 }
                 if ( !contain ) {
-                    throwException( "The fields is not contained in the table." );
+                    throwException( "The fields is not contained in the table: " + table.getDomName() );
                 }
             }
         }
-        final List<String> listVar = new ArrayList<String>( varList);
+        final List<String> listVar = new ArrayList<String>( varList );
         final List<String> listCol = new ArrayList<String>( fieldList );
         table.addIndex( new IndexNode( indexName, listVar, listCol ) );
     }
@@ -385,8 +422,7 @@ public class Parser {
             throwException( "Expecting keywords 'constrainsTo" );
 
         String other[] = getNextToken().getValue().split( "\\." );
-        foreignKeyList.add( new ForeignNode( thisTable, thisField, other[0],
-                other[1] ) );
+        foreignKeyList.add( new ForeignNode( thisTable, thisField, other[0], other[1] ) );
     }
 
     private boolean isNewLine( Token token ) {
@@ -415,10 +451,9 @@ public class Parser {
         }
 
         caret.append( "^" );
-        throw new IllegalArgumentException( "\nError in file: " + fileName
-                + " on line:" + tokenizer.getRow() + " at col:"
-                + tokenizer.getCol() + ".\n" + additionalMsg + "\n"
-                + tokenizer.getLine() + " \n" + caret.toString() );
+        throw new IllegalArgumentException( "\nError in file: " + fileName + " on line:" + tokenizer.getRow()
+                + " at col:" + tokenizer.getCol() + ".\n" + additionalMsg + "\n" + tokenizer.getLine() + " \n"
+                + caret.toString() );
     }
 
     private Token getNextToken() {
