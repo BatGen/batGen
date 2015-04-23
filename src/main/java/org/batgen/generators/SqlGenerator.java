@@ -67,7 +67,7 @@ public class SqlGenerator extends Generator {
 
         writeToFile( filePath, sb.toString() );
 
-        appendToFile( "sql/_CreateTables.sql", table );
+        GenUtil.appendToFile( "sql/_CreateTables.sql", table );
         writeDropsFile();
 
         return filePath;
@@ -178,7 +178,7 @@ public class SqlGenerator extends Generator {
     }
 
     private void writeDropsFile() {
-        appendToFile( "sql/_DropTables.sql", drop() + "\n" );
+        GenUtil.appendToFile( "sql/_DropTables.sql", drop() + "\n" );
     }
 
     private String drop() {
