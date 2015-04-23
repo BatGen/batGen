@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class GenUtil {
     public static final String PROTECTED_CODE = "PROTECTED CODE";
-    public static final String TAB = "    ";
+    public static final String TAB            = "    ";
 
     /**
      * @return a path derived from the passed in package.
@@ -38,14 +39,46 @@ public class GenUtil {
             pw.write( content );
             pw.close();
 
-        } catch ( FileNotFoundException e ) {
+        }
+        catch ( FileNotFoundException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Appends to the end of file without overwriting what's already in the
+     * file.
+     * 
+     * @param filePath
+     *            Fully qualified filename with path
+     * @param content
+     */
+    public static void appendToFile( String fileName, String content ) {
+
+        File file = new File( fileName );
+        file = new File( file.getParent() );
+
+        if ( !file.exists() ) {
+            file.mkdirs();
+        }
+
+        FileWriter fw = null;
+
+        try {
+
+            fw = new FileWriter( fileName, true );
+            fw.write( content );
+            fw.close();
+
+        }
+        catch ( IOException e ) {
             e.printStackTrace();
         }
     }
 
     /**
      * Used for finding the protected lines in the original file.
-     *
+     * 
      * @param fileName
      *            filename and path of the file to be checked for protected
      *            lines
@@ -81,10 +114,12 @@ public class GenUtil {
 
             br.close();
 
-        } catch ( FileNotFoundException e ) {
+        }
+        catch ( FileNotFoundException e ) {
             // Ignored if file doesn't exist.
 
-        } catch ( IOException e ) {
+        }
+        catch ( IOException e ) {
             e.printStackTrace();
         }
 
