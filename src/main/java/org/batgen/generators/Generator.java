@@ -23,13 +23,13 @@
  */
 package org.batgen.generators;
 
-import java.io.*;
+import static org.batgen.generators.GenUtil.getProtectedLines;
+
+import java.io.File;
 import java.util.List;
 
 import org.batgen.Column;
 import org.batgen.Table;
-
-import static org.batgen.generators.GenUtil.*;
 
 /**
  * The base class for all generators. Protected values are provided for
@@ -73,28 +73,6 @@ public class Generator {
                 + val.substring( 1, val.length() );
     }
 
-    public static void appendToFile( String filePath, String content ) {
-
-        File file = new File( filePath );
-        file = new File( file.getParent() );
-
-        if ( !file.exists() ) {
-            file.mkdirs();
-        }
-
-        FileWriter fw = null;
-
-        try {
-
-            fw = new FileWriter( filePath, true );
-            fw.write( content );
-            fw.close();
-
-        }
-        catch ( IOException e ) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * checkDir creates the necessary folders to a file if they do not exist
