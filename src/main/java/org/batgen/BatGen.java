@@ -169,7 +169,7 @@ public class BatGen {
         for ( String file : files ) {
             table = parser.parse( file );
             table.setPackage( basePkg );
-            if(classNames.contains( table.getDomName() )){
+            if ( classNames.contains( table.getDomName() ) ) {
                 throw new IllegalArgumentException( "This class name is used multiple times, " + table.getDomName() );
             }
             classNames.add( table.getDomName() );
@@ -180,6 +180,10 @@ public class BatGen {
         StringBuilder sb = new StringBuilder();
         sb.append( createForeignKeys() );
         GenUtil.writeToFile( "sql/_AlterTables.sql", sb.toString() );
+
+        sb = new StringBuilder();
+        sb.append( createDropForeignKeys() );
+        GenUtil.appendToFile( "sql/_DropTables.sql", sb.toString() );
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
@@ -286,8 +290,7 @@ public class BatGen {
                 }
                 else
                     throw new IllegalArgumentException( "In Table" + node.getFromTable() + " and/or "
-                            + node.getToTable()
-                            + ", either the field names are wrong or don't exist for foreign keys." );
+                            + node.getToTable() + ", either the field names are wrong or don't exist for foreign keys." );
             }
             else
                 throw new IllegalArgumentException( "Either the tables names ( " + node.getFromTable() + " and/or "
@@ -301,6 +304,33 @@ public class BatGen {
         }
         for ( String line : lines ) {
             sb.append( line );
+        }
+        return sb.toString();
+    }
+
+    private String createDropForeignKeys() {
+        StringBuilder sb = new StringBuilder();
+        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser.getForeignKeyList();
+        HashMap<String, Table> tableMap = Parser.getTableMap();
+        boolean fromFieldExist = false;
+        Table fromTable;
+        String fromField = "";
+
+        for ( ForeignNode node : list ) {
+            fromTable = tableMap.get( node.getFromTable() );
+            fromFieldExist = false;
+            for ( Column col : fromTable.getColumns() ) {
+                if ( col.getFldName().equals( node.getFromField() ) ) {
+                    fromFieldExist = true;
+                    fromField = col.getColName();
+                    break;
+                }
+            }
+
+            if ( fromFieldExist ) {
+                sb.append( "ALTER TABLE " + fromTable.getTableName() );
+                sb.append( " DROP FOREIGN KEY (" + fromField + ") " );
+            }
         }
         return sb.toString();
     }
