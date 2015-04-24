@@ -17,7 +17,16 @@ public class ForeignKeyGenerator {
         this.tableMap = tableMap;
     }
 
-    public String createForeignKeys() {
+    public void createForeignKeys() {
+        StringBuilder sb = new StringBuilder();
+        sb.append( writeAddForeignKeys() );
+        GenUtil.writeToFile( "sql/_AlterTables.sql", sb.toString() );
+        sb = new StringBuilder();
+        sb.append( writeDropForeignKeys() );
+        GenUtil.appendToFile( "sql/_DropTables.sql", sb.toString() );
+    }
+
+    private String writeAddForeignKeys() {
         StringBuilder sb = new StringBuilder();
         boolean fromFieldExist = false;
         boolean toFieldExist = false;
@@ -74,7 +83,7 @@ public class ForeignKeyGenerator {
         return sb.toString();
     }
 
-    public String createDropForeignKeys() {
+    private String writeDropForeignKeys() {
         StringBuilder sb = new StringBuilder();
         boolean fromFieldExist = false;
         Table fromTable;
