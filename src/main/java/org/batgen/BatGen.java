@@ -285,7 +285,8 @@ public class BatGen {
 
                 if ( fromFieldExist && toFieldExist ) {
                     sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                    sb.append( " ADD FOREIGN KEY (" + fromField + ") " );
+                    sb.append( " ADD CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField );
+                    sb.append( " FOREIGN KEY (" + fromField + ") " );
                     sb.append( "REFERENCES " + toTable.getTableName() + "(" + toField + ");\n" );
                 }
                 else
@@ -329,7 +330,7 @@ public class BatGen {
 
             if ( fromFieldExist ) {
                 sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                sb.append( " DROP FOREIGN KEY (" + fromField + ") " );
+                sb.append( " DROP CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField + ";\n" );
             }
         }
         return sb.toString();
