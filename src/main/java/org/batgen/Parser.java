@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  */
 public class Parser {
     private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
-    private static List<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
+    private static ArrayList<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
     private List<String>                  varList        = new ArrayList<String>();
     private List<String>                  fieldList      = new ArrayList<String>();
 
@@ -558,7 +558,7 @@ public class Parser {
     /**
      * @return the tableMap which accumulates all the tables that were parsed.
      */
-    public static List<ForeignNode> getForeignKeyList() {
+    public static ArrayList<ForeignNode> getForeignKeyList() {
         return foreignKeyList;
     }
 }
