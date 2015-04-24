@@ -25,13 +25,13 @@ package org.batgen;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
 import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
+import org.batgen.generators.ForeignKeyGenerator;
 import org.batgen.generators.GenUtil;
 import org.batgen.generators.MybatisConfigGenerator;
 import org.batgen.generators.SessionFactoryGenerator;
@@ -177,13 +177,9 @@ public class BatGen {
         }
 
         // build foreign keys
-        StringBuilder sb = new StringBuilder();
-        sb.append( createForeignKeys() );
-        GenUtil.writeToFile( "sql/_AlterTables.sql", sb.toString() );
-
-        sb = new StringBuilder();
-        sb.append( createDropForeignKeys() );
-        GenUtil.appendToFile( "sql/_DropTables.sql", sb.toString() );
+        ForeignKeyGenerator foreignKey = new ForeignKeyGenerator( Parser.getForeignKeyList(), Parser.getTableMap() );
+        GenUtil.writeToFile( "sql/_AlterTables.sql", foreignKey.createForeignKeys() );
+        GenUtil.appendToFile( "sql/_DropTables.sql", foreignKey.createDropForeignKeys() );
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
@@ -248,92 +244,6 @@ public class BatGen {
         TestBoGenerator testBo = new TestBoGenerator( table );
         printPath( testBo.createTestBo() );
 
-    }
-
-    protected String createForeignKeys() {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser.getForeignKeyList();
-        HashMap<String, Table> tableMap = Parser.getTableMap();
-        boolean fromFieldExist = false;
-        boolean toFieldExist = false;
-        Table fromTable;
-        Table toTable;
-        String fromField = "";
-        String toField = "";
-
-        for ( ForeignNode node : list ) {
-            fromTable = tableMap.get( node.getFromTable() );
-            toTable = tableMap.get( node.getToTable() );
-            fromFieldExist = false;
-            toFieldExist = false;
-
-            if ( fromTable != null && toTable != null ) {
-                for ( Column col : fromTable.getColumns() ) {
-                    if ( col.getFldName().equals( node.getFromField() ) ) {
-                        fromFieldExist = true;
-                        fromField = col.getColName();
-                        break;
-                    }
-                }
-                for ( Column col : toTable.getColumns() ) {
-                    if ( col.getFldName().equals( node.getToField() ) ) {
-                        toFieldExist = true;
-                        toField = col.getColName();
-                        break;
-                    }
-                }
-
-                if ( fromFieldExist && toFieldExist ) {
-                    sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                    sb.append( " ADD CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField );
-                    sb.append( " FOREIGN KEY (" + fromField + ") " );
-                    sb.append( "REFERENCES " + toTable.getTableName() + "(" + toField + ");\n" );
-                }
-                else
-                    throw new IllegalArgumentException( "In Table" + node.getFromTable() + " and/or "
-                            + node.getToTable() + ", either the field names are wrong or don't exist for foreign keys." );
-            }
-            else
-                throw new IllegalArgumentException( "Either the tables names ( " + node.getFromTable() + " and/or "
-                        + node.getToTable() + " ) are wrong or don't exist for foreign keys." );
-        }
-
-        sb.append( "\n-- PROTECTED CODE -->" );
-        List<String> lines = GenUtil.getProtectedLines( "sql/_AlterTables.sql" );
-        if ( lines.isEmpty() ) {
-            sb.append( "\n" );
-        }
-        for ( String line : lines ) {
-            sb.append( line );
-        }
-        return sb.toString();
-    }
-
-    private String createDropForeignKeys() {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<ForeignNode> list = (ArrayList<ForeignNode>) Parser.getForeignKeyList();
-        HashMap<String, Table> tableMap = Parser.getTableMap();
-        boolean fromFieldExist = false;
-        Table fromTable;
-        String fromField = "";
-
-        for ( ForeignNode node : list ) {
-            fromTable = tableMap.get( node.getFromTable() );
-            fromFieldExist = false;
-            for ( Column col : fromTable.getColumns() ) {
-                if ( col.getFldName().equals( node.getFromField() ) ) {
-                    fromFieldExist = true;
-                    fromField = col.getColName();
-                    break;
-                }
-            }
-
-            if ( fromFieldExist ) {
-                sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                sb.append( " DROP CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField + ";\n" );
-            }
-        }
-        return sb.toString();
     }
 
     private void printPath( String file ) {
