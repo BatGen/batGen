@@ -32,7 +32,6 @@ import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
 import org.batgen.generators.ForeignKeyGenerator;
-import org.batgen.generators.GenUtil;
 import org.batgen.generators.MybatisConfigGenerator;
 import org.batgen.generators.SessionFactoryGenerator;
 import org.batgen.generators.SqlGenerator;
@@ -176,10 +175,8 @@ public class BatGen {
             generateAll( table );
         }
 
-        // build foreign keys
         ForeignKeyGenerator foreignKey = new ForeignKeyGenerator( Parser.getForeignKeyList(), Parser.getTableMap() );
-        GenUtil.writeToFile( "sql/_AlterTables.sql", foreignKey.createForeignKeys() );
-        GenUtil.appendToFile( "sql/_DropTables.sql", foreignKey.createDropForeignKeys() );
+        foreignKey.createForeignKeys();
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
