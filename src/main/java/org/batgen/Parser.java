@@ -369,6 +369,9 @@ public class Parser {
             else if ( token.isSearchId() ) {
                 column.setSearchId();
             }
+            else if ( token.isSysTime() ) {
+            	column.setSysTimestamp();
+            }
             else if ( token.isWord() ) {
                 if ( column.getFldName() == null ) {
                     column.setFldName( token.getValue() );

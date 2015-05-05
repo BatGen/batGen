@@ -28,6 +28,7 @@ import static org.batgen.generators.GenUtil.writeToFile;
 import java.io.File;
 
 import org.batgen.Column;
+import org.batgen.IndexNode;
 import org.batgen.Table;
 
 /**
@@ -118,13 +119,14 @@ public class DaoGenerator extends Generator {
         write( keyColumn.getFldType().toString() );
         write( " key ) throws DaoException;\n\n" );
         if ( !table.getIndexList().isEmpty() ) {
-            writeCompoundKeys();
+            writeIndexKeys();
         }
     }
 
-    private void writeCompoundKeys() {
-        write( TAB + "public " + table.getDomName() + " readByIndex" );
-        write( "( Map<String, Object> map ) throws DaoException;\n\n" );
+    private void writeIndexKeys() {
+		write( TAB + "public " + table.getDomName() + " readByIndex");
+		write( "( Map<String, Object> map ) throws DaoException;\n\n" );
+    	
     }
 
     private void writeList() {

@@ -35,6 +35,7 @@ public class Column {
     private boolean   required;
     private boolean   sequenceDisable;
     private boolean   searchId;
+    private boolean   sysTimestamp;
 
     public void setType( FieldType type ) {
         this.type = type;
@@ -108,6 +109,14 @@ public class Column {
 
     public boolean isSearchId() {
         return searchId;
+    }
+    
+    public void setSysTimestamp() {
+    	sysTimestamp = true;
+    }
+
+    public boolean isSysTimestamp() {
+        return sysTimestamp;
     }
 
     public void setTable( Table table ) {

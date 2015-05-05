@@ -126,4 +126,7 @@ public class Token {
         return "?".equals( value );
     }
 
+    public boolean isSysTime(){
+    	return "^".equals( value );
+    }
 }

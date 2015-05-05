@@ -100,7 +100,12 @@ public class XmlGenerator extends Generator {
             string.append( "property = \"" + table.getColumn( i ).getFldName() + "\" />" );
             if ( !table.getColumn( i ).getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
                 sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
-                javaVariables.add( table.getColumn( i ).getFldName() );
+                if( table.getColumn( i ).isSysTimestamp() ){
+                	javaVariables.add( "systimestamp" );
+                }
+                else{
+                	javaVariables.add( table.getColumn( i ).getFldName() );
+                }
             }
 
             sb.append( "\n" + string.toString() );
@@ -309,11 +314,17 @@ public class XmlGenerator extends Generator {
         StringBuilder list = new StringBuilder();
 
         for ( int i = 0; i < javaVariables.size(); i++ ) {
-            if ( i % 5 == 0 && i != 0 )
+            if ( i % 5 == 0 && i != 0 ) {
                 list.append( "\n" + TAB + TAB + TAB );
-            list.append( "#{" );
-            list.append( javaVariables.get( i ) );
-            list.append( "}" );
+            }
+            if( javaVariables.get( i ).equals("systimestamp")){
+            	list.append( javaVariables.get( i ) );
+            }
+            else{
+            	list.append( "#{" );
+            	list.append( javaVariables.get( i ) );
+            	list.append( "}" );
+            }
 
             if ( i != javaVariables.size() - 1 ) {
                 list.append( " , " );
@@ -336,7 +347,12 @@ public class XmlGenerator extends Generator {
             }
 
             list.append( makeSpace( 35, list.toString() ) );
-            list.append( "= #{" + javaVariables.get( i ) + "}" );
+            if( javaVariables.get( i ).equals("systimestamp")) {
+            	list.append( "= " + javaVariables.get( i ) + "" );
+            }
+            else {
+            	list.append( "= #{" + javaVariables.get( i ) + "}" );
+            }
             if ( i != javaVariables.size() - 1 ) {
                 list.append( " ," );
                 list.append( "\n" );

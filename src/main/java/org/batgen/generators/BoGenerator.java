@@ -124,7 +124,7 @@ public class BoGenerator extends Generator {
         write( NEWLINE );
 
         if ( !table.getIndexList().isEmpty() ) {
-            writeCompoundKeys();
+        	writeIndexKeys();
         }
 
     }
@@ -161,7 +161,7 @@ public class BoGenerator extends Generator {
         write( TAB + "}\n" );
     }
 
-    private void writeCompoundKeys() {
+    private void writeIndexKeys() {
         String mapperName = table.getDomName() + "Dao";
         StringBuilder sb = new StringBuilder();
         // make mappings
@@ -177,7 +177,8 @@ public class BoGenerator extends Generator {
         }
 
         for ( IndexNode node : table.getIndexList() ) {
-            sb.append( TAB + "public " + table.getDomName() + " readByIndex" + node.getIndexName() + "( " );
+            sb.append( TAB + "public " + table.getDomName() + " readByIndex");
+            sb.append( toTitleCase( node.getIndexName() ) + "( "  );
             for ( String fldName : node.getVarList() ) {
                 sb.append( typeMap.get( fldName ) + " " + fldName + ", " );
             }

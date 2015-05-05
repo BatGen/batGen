@@ -36,7 +36,7 @@ public class Tokenizer {
     private int            lineCount, lastPos, pos;
     private BufferedReader bf;
     private final String   SPACE    = "\t\f ";
-    private final String   SPECIAL  = "!*,()-?";
+    private final String   SPECIAL  = "!*,()-?^";
     private StringBuilder  sb       = new StringBuilder( "" );
     private int            holdPos;
     private boolean        readNext = true;
