@@ -252,7 +252,7 @@ public class TestDaoGenerator extends Generator {
 
         sb.append( "\n" + TAB + "public static " + variable + " create" + variable + "() {\n" );
         sb.append( TAB + TAB + variable + " " + toJavaCase( variable ) + " = new " + variable + "();\n\n" );
-        sb.append( getColumnContextSet( variable ) );
+        sb.append( getColumnContextSet( variable, false ) );
         sb.append( "\n" + TAB + TAB + "return " + toJavaCase( variable ) + ";\n" + TAB + "}" );
         return sb.toString();
     }
@@ -293,7 +293,7 @@ public class TestDaoGenerator extends Generator {
         sb.append( "\n" + TAB + "public static void modifyRecord( " + variable + " " + toJavaCase( variable )
                 + " ) {\n\n" );
 
-        sb.append( getColumnContextSet( variable ) );
+        sb.append( getColumnContextSet( variable, true ) );
         sb.append( "\n" + TAB + "}\n" );
         return sb.toString();
     }
@@ -335,12 +335,15 @@ public class TestDaoGenerator extends Generator {
         return sb.toString();
     }
 
-    private String getColumnContextSet( String variable ) {
+    private String getColumnContextSet( String variable, Boolean modifiy ) {
         StringBuilder sb = new StringBuilder();
 
         for ( Column column : table.getColumns() ) {
             if ( column.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
                 continue;
+            }
+            if ( column.isKey() && modifiy){
+            	continue;
             }
 
             if ( column.getColName().equalsIgnoreCase( "Key" ) ) {
