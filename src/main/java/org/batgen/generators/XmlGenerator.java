@@ -66,7 +66,6 @@ public class XmlGenerator extends Generator {
         sb.append( createGetListBy() );
         sb.append( createUpdate() );
         sb.append( createDelete() );
-        sb.append( createCompoundKeys() );
         sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
@@ -126,17 +125,10 @@ public class XmlGenerator extends Generator {
         sb.append( "\n" );
         sb.append( "\n" );
 
-        if ( ( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) ) ) {
-            sb.append( TAB + "<select id=\"read\" parameterType=\"" + table.getColumn( 0 ).getFldType().toLowerCase()
-                    + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
-        }
-        else {
-            sb.append( TAB + "<select id=\"read\" parameterType=\"_" + table.getColumn( 0 ).getFldType().toLowerCase()
-                    + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
-        }
-
+        sb.append( TAB + "<select id=\"read\" parameterType=\"map\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
+        
         sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" + TAB + TAB + "where "
-                + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
+                + "${where}\n" );
 
         sb.append( TAB + "</select>\n" );
 
@@ -249,43 +241,11 @@ public class XmlGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
-        if ( ( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) ) ) {
-            sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\""
-                    + table.getColumn( 0 ).getFldType().toLowerCase() + "\">\n" );
-        }
-        else {
-            sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\"_"
-                    + table.getColumn( 0 ).getFldType().toLowerCase() + "\">\n" );
-        }
+        sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\"map\">\n");
 
         sb.append( TAB + TAB + "delete from " + table.getTableName().toUpperCase() + "\n" );
-
-        switch ( databaseType ) {
-        case H2:
-        case ORACLE:
-            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
-        }
+        sb.append( TAB + TAB + "where ${where}\n" );
         sb.append( TAB + "</delete>" );
-
-        return sb.toString();
-    }
-
-    private String createCompoundKeys() {
-        if ( table.getIndexList().isEmpty() ) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-
-        sb.append( "\n" );
-        sb.append( "\n" );
-
-        sb.append( TAB + "<select id=\"readByIndex\" parameterType=\"map\"" + " resultMap=\"" + table.getDomName()
-                + "Mapper\">\n" );
-
-        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" + TAB + TAB + "where "
-                + "${where}\n" );
-
-        sb.append( TAB + "</select>\n" );
 
         return sb.toString();
     }

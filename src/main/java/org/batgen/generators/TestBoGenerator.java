@@ -23,6 +23,7 @@
  */
 package org.batgen.generators;
 
+import org.batgen.Column;
 import org.batgen.Table;
 
 import static org.batgen.generators.GenUtil.*;
@@ -32,13 +33,20 @@ public class TestBoGenerator extends Generator {
     private String daoName = "";
     private boolean getCreatedCalled = false;
     private String filePath;
+    private String compoundKeys = "";
+
 
     public TestBoGenerator( Table table ) {
         super( table );
         this.daoName = "Test" + table.getDomName() + "Bo";
         filePath = "src/test/java/" + packageToPath() + "/bo/" + daoName
                 + ".java";
-
+        for ( Column column : table.getColumns() ) {
+            if ( column.isKey() ) {
+            	compoundKeys += toJavaCase(table.getDomName()) + ".get" + toTitleCase(column.getFldName()) + "(), ";
+            }
+        }
+        compoundKeys = compoundKeys.substring(0, compoundKeys.length() - 2);
     }
 
     public String createTestBo() {
@@ -131,11 +139,8 @@ public class TestBoGenerator extends Generator {
     private String getRead( String variable ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "\n" + TAB + TAB + variable + " readRecord = "
-                + toJavaCase( variable ) + "Bo.read( " + toJavaCase( variable )
-                + ".get"
-                + toTitleCase( table.getColumn( 0 ).getFldName().toString() )
-                + "() );\n" );
+        sb.append( "\n" + TAB + TAB + variable + " readRecord = " );
+        sb.append( toJavaCase( variable ) + "Bo.read( " + compoundKeys + " );\n" );
         sb.append( TAB + TAB + getNotNullEquals( "readRecord", variable ) );
 
         return sb.toString();
@@ -162,10 +167,8 @@ public class TestBoGenerator extends Generator {
 
     private String getDeleteRecord( String variable ) {
         StringBuilder sb = new StringBuilder();
-        sb.append( "\n" + TAB + TAB + "count = " + toJavaCase( variable )
-                + "Bo.delete( " + toJavaCase( variable ) + ".get"
-                + toTitleCase( table.getColumn( 0 ).getFldName().toString() )
-                + "() );\n" );
+        sb.append( "\n" + TAB + TAB + "count = " + toJavaCase( variable ) );
+        sb.append("Bo.delete( " + compoundKeys + ");\n" );
         sb.append( TAB + TAB + getAssertEquals() + "\n" );
 
         return sb.toString();
@@ -173,34 +176,10 @@ public class TestBoGenerator extends Generator {
 
     private String getDeleteVerified( String variable ) {
         StringBuilder sb = new StringBuilder();
-        int count = 0;
-        count++;
 
-        if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
-            sb.append( TAB
-                    + TAB
-                    + "readRecord = "
-                    + toJavaCase( variable )
-                    + "Bo.read( "
-                    + toJavaCase( variable )
-                    + ".get"
-                    + toTitleCase( table.getColumn( 0 ).getFldName().toString() )
-                    + "() );\n" );
-            sb.append( TAB + TAB + getNullEquals( "readRecord" ) );
-
-        }
-        else {
-            sb.append( TAB
-                    + TAB
-                    + "readRecord = "
-                    + toJavaCase( variable )
-                    + "Bo.readf( "
-                    + toJavaCase( variable )
-                    + ".get"
-                    + toTitleCase( table.getColumn( 0 ).getFldName().toString() )
-                    + "() );\n" );
-            sb.append( TAB + TAB + getNullEquals( "readRecord" + count ) );
-        }
+        sb.append( TAB + TAB + "readRecord = " + toJavaCase( variable ) );
+        sb.append( "Bo.read( " + compoundKeys + ");\n" );
+        sb.append( TAB + TAB + getNullEquals( "readRecord" ) );
 
         return sb.toString();
     }

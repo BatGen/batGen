@@ -28,7 +28,6 @@ import static org.batgen.generators.GenUtil.writeToFile;
 import java.io.File;
 
 import org.batgen.Column;
-import org.batgen.IndexNode;
 import org.batgen.Table;
 
 /**
@@ -40,7 +39,6 @@ public class DaoGenerator extends Generator {
 
     private StringBuilder sb      = new StringBuilder();
     private final String  TAB     = "    ";
-    private Column        keyColumn;
     private String        filePath;
 
     public DaoGenerator( Table table ) {
@@ -48,13 +46,6 @@ public class DaoGenerator extends Generator {
         this.table = table;
         daoName = table.getDomName() + "Dao";
         filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName + ".java";
-        for ( Column column : table.getColumns() ) {
-            if ( column.isKey() ) {
-                keyColumn = column;
-                break;
-            }
-        }
-
     }
 
     public String createDao() {
@@ -96,6 +87,7 @@ public class DaoGenerator extends Generator {
             imports.addImport( "import java.util.List;" );
         if ( !table.getIndexList().isEmpty() )
             imports.addImport( "import java.util.Map;" );
+        imports.addImport( "import java.util.Map;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
         imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
 
@@ -113,20 +105,8 @@ public class DaoGenerator extends Generator {
         write( " value ) throws DaoException;\n\n" );
         write( TAB + "public int update( " + table.getDomName() );
         write( " value ) throws DaoException;\n\n" );
-        write( TAB + "public int delete( " + keyColumn.getFldType().toString() );
-        write( " key ) throws DaoException;\n\n" );
-        write( TAB + "public " + table.getDomName() + " read( " );
-        write( keyColumn.getFldType().toString() );
-        write( " key ) throws DaoException;\n\n" );
-        if ( !table.getIndexList().isEmpty() ) {
-            writeIndexKeys();
-        }
-    }
-
-    private void writeIndexKeys() {
-		write( TAB + "public " + table.getDomName() + " readByIndex");
-		write( "( Map<String, Object> map ) throws DaoException;\n\n" );
-    	
+        write( TAB + "public int delete( Map<String, Object> map ) throws DaoException;\n\n" );
+        write( TAB + "public " + table.getDomName() + " read( Map<String, Object> map ) throws DaoException;\n\n" );
     }
 
     private void writeList() {
