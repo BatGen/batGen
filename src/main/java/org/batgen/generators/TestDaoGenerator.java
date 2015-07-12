@@ -37,12 +37,20 @@ public class TestDaoGenerator extends Generator {
     private String  daoName          = "";
     private boolean getCreatedCalled = false;
     private String  filePath;
+    private String param = "";
 
 
     public TestDaoGenerator( Table table ) {
         super( table );
         this.daoName = "Test" + table.getDomName() + "Dao";
         filePath = "src/test/java/" + packageToPath() + "/dao/" + daoName + ".java";
+        
+        for( Column col : table.getColumns() ){
+        	if ( col.isKey() ){
+        		param += toJavaCase( table.getDomName() ) + ".get" + toCamelCase(col.getFldName()) + "(), ";
+        	}
+        }
+        param = param.substring( 0, param.length() - 2 );
     }
 
     public String createTestDao() {
@@ -85,8 +93,6 @@ public class TestDaoGenerator extends Generator {
             imports.addImport( "import java.util.List;" );
         }
 
-        imports.addImport( "import java.util.HashMap;" );
-        imports.addImport( "import java.util.Map;" );
         imports.addImport( "import org.junit.*;" );
         imports.addImport( "import org.apache.ibatis.session.SqlSession;" );
         imports.addImport( "import " + pkg + ".domain.*;" );
@@ -146,19 +152,6 @@ public class TestDaoGenerator extends Generator {
 
         sb.append( "\n" + TAB + TAB + TAB + variable + " " + toJavaCase( variable ) + " = Test" + variable
                 + "Dao.create" + variable + "();\n" );
-        
-        String where = "";
-        for( Column col : table.getColumns() ){
-        	if ( col.isKey() ){
-        		where += "\"" + col.getColName() + "='\" + " + toJavaCase( variable ) + ".get" + toCamelCase(col.getFldName()) + "() + \"' and \" + ";
-        	}
-        }
-        where = where.substring( 0, where.length() - 8 );
-        where += "\";\n";
-        sb.append( TAB + TAB + TAB + "String where = " + where);
-        sb.append( TAB + TAB + TAB + "Map<String, Object> map = new HashMap<String, Object>();\n" );
-        sb.append( TAB + TAB + TAB + "map.put( \"where\", where );\n" );
-        
 
         if ( !getCreatedCalled ) {
             sb.append( "\n" + TAB + TAB + TAB + "int count = " + toJavaCase( variable ) + "Dao.create( "
@@ -179,7 +172,7 @@ public class TestDaoGenerator extends Generator {
 
         if ( countRead == 0 ) {
             sb.append( "\n" + TAB + TAB + TAB + variable + " readRecord = " + toJavaCase( variable ) + "Dao.read( ");
-            sb.append( "map );\n" );
+            sb.append( param + " );\n" );
             sb.append( TAB + TAB + TAB + getNotNullEquals( "readRecord", variable ) );
 
             if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
@@ -188,7 +181,7 @@ public class TestDaoGenerator extends Generator {
         }
         else if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
             sb.append( "\n" + TAB + TAB + TAB + "readRecord = " + toJavaCase( variable ) + "Dao.read( ");
-            sb.append( "map );\n" );
+            sb.append( param + " );\n" );
             sb.append( TAB + TAB + TAB + getNotNullEquals( "readRecord", variable ) );
         }
         return sb.toString();
@@ -213,7 +206,7 @@ public class TestDaoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" + TAB + TAB + TAB + "count = " + toJavaCase( variable ) + "Dao.delete( ");
-        sb.append( "map );\n" );
+        sb.append( param + " );\n" );
         sb.append( TAB + TAB + TAB + getAssertEquals() );
         return sb.toString();
     }
@@ -223,7 +216,7 @@ public class TestDaoGenerator extends Generator {
 
         if ( variable.equalsIgnoreCase( table.getDomName() ) ) {
             sb.append( "\n" + TAB + TAB + TAB + "readRecord = " + toJavaCase( variable ) + "Dao.read( ");
-            sb.append( "map );\n" );
+            sb.append( param + " );\n" );
             sb.append( TAB + TAB + TAB + getNullEquals( "readRecord" ) );
 
         }

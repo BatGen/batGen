@@ -4,13 +4,11 @@ import java.util.List;
 
 public class IndexNode {
     private String       indexName;
-    private List<String> varList;
-    private List<String> fieldList;
+    private List<Column> columnList;
 
-    public IndexNode( String indexName, List<String> varList, List<String> fieldList ) {
+    public IndexNode( String indexName, List<Column> columnList ) {
         this.setIndexName( indexName );
-        this.setVarList( varList );
-        this.setFieldList( fieldList );
+        this.setColumnList( columnList );
     }
 
     public String getIndexName() {
@@ -21,23 +19,11 @@ public class IndexNode {
         this.indexName = indexName;
     }
 
-    public List<String> getVarList() {
-        return varList;
+    public List<Column> getColumnList() {
+        return columnList;
     }
 
-    public void setVarList( List<String> varList ) {
-        this.varList = varList;
-    }
-
-    public List<String> getFieldList() {
-        return fieldList;
-    }
-
-    public void setFieldList( List<String> fieldList ) {
-        this.fieldList = fieldList;
-    }
-
-    public String toString() {
-        return indexName + " contains fields " + fieldList.toString();
+    public void setColumnList( List<Column> columnList ) {
+        this.columnList = columnList;
     }
 }

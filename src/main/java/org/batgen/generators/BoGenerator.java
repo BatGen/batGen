@@ -26,9 +26,7 @@ package org.batgen.generators;
 import static org.batgen.generators.GenUtil.writeToFile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.batgen.Column;
 import org.batgen.IndexNode;
@@ -99,13 +97,13 @@ public class BoGenerator extends Generator {
         write( TAB + "public int create( " );
         write( table.getDomName() );
         write( " value ) throws BoException {\n" );
-        writeMethodBodyCU( "create" );
+        writeMethodBodyCreateUpdate( "create" );
 
         write( NEWLINE );
         write( TAB + "public int update( " );
         write( table.getDomName() );
         write( " value ) throws BoException {\n" );
-        writeMethodBodyCU( "update" );
+        writeMethodBodyCreateUpdate( "update" );
         
         String param = "";
         for(Column col : keyColumns){
@@ -117,7 +115,7 @@ public class BoGenerator extends Generator {
         write( TAB );
         write( "public int delete( " );
         write( param + " ) throws BoException {\n" );
-        writeMethodBodyRD( "delete" );
+        writeMethodBodyReadDelete( "delete" );
         write( NEWLINE );
 
         write( TAB );
@@ -125,7 +123,7 @@ public class BoGenerator extends Generator {
         write( table.getDomName() );
         write( " read( " + param);;
         write( " ) throws BoException {\n" );
-        writeMethodBodyRD( "read" );
+        writeMethodBodyReadDelete( "read" );
         write( NEWLINE );
 
         if ( !table.getIndexList().isEmpty() ) {
@@ -134,7 +132,7 @@ public class BoGenerator extends Generator {
 
     }
 
-    private void writeMethodBodyCU( String type ) {
+    private void writeMethodBodyCreateUpdate( String type ) {
         String mapperName = table.getDomName() + "Dao";
         write( TAB + TAB + "SqlSession session = null;\n" );
         write( TAB + TAB + "int result = 0;\n" );
@@ -160,7 +158,7 @@ public class BoGenerator extends Generator {
         write( TAB + "}\n" );
     }
     
-    private void writeMethodBodyRD( String type ) {
+    private void writeMethodBodyReadDelete( String type ) {
         String mapperName = table.getDomName() + "Dao";
         write( TAB + TAB + "SqlSession session = null;\n" );
 
@@ -170,17 +168,6 @@ public class BoGenerator extends Generator {
         else {
             write( TAB + TAB + "int result = 0;\n" );
         }
-        String where = "";
-        for( Column col : table.getColumns() ){
-        	if ( col.isKey() ){
-        		where += "\"" + col.getColName() + "='\" + " + col.getFldName() + " + \"' and \" + ";
-        	}
-        }
-        where = where.substring( 0, where.length() - 8 );
-        where += "\";\n";
-        write( TAB + TAB + "String where = " + where);
-        write( TAB + TAB + "Map<String, Object> map = new HashMap<String, Object>();\n" );
-        write( TAB + TAB + "map.put( \"where\", where );\n" );
 
         write( NEWLINE );
         write( TAB + TAB + "try {\n" );
@@ -188,7 +175,15 @@ public class BoGenerator extends Generator {
 
         write( TAB + TAB + TAB + mapperName );
         write( " mapper = session.getMapper( " + mapperName + ".class );\n" );
-        write( TAB + TAB + TAB + "result = mapper." + type + "( map );\n" );
+        write( TAB + TAB + TAB + "result = mapper." + type + "( " );
+        
+        String param = "";
+        for(Column col : keyColumns){
+        	param += col.getFldName() + ", ";
+        }
+        param = param.substring( 0, param.length() - 2 );
+        write( param + " );\n" );
+        
         write( TAB + TAB + TAB + "session.commit();\n\n" );
 
         write( TAB + TAB + "} catch ( Exception e ) {\n" );
@@ -206,45 +201,31 @@ public class BoGenerator extends Generator {
     private void writeIndexKeys() {
         String mapperName = table.getDomName() + "Dao";
         StringBuilder sb = new StringBuilder();
-        // make mappings
-        Map<String, String> typeMap = new HashMap<String, String>();
-        for ( IndexNode node : table.getIndexList() ) {
-            for ( String fldName : node.getVarList() ) {
-                for ( Column column : table.getColumns() ) {
-                    if ( column.getFldName().equals( fldName ) ) {
-                        typeMap.put( fldName, column.getFldType() );
-                    }
-                }
-            }
-        }
 
         for ( IndexNode node : table.getIndexList() ) {
-            sb.append( TAB + "public " + table.getDomName() + " readByIndex");
-            sb.append( toTitleCase( node.getIndexName() ) + "( "  );
-            for ( String fldName : node.getVarList() ) {
-                sb.append( typeMap.get( fldName ) + " " + fldName + ", " );
+        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
+            String param = "";
+            for(Column col : node.getColumnList()){
+            	param += col.getFldType() + " " + col.getFldName() + ", ";
             }
-            sb.replace( sb.length() - 2, sb.length() - 1, " ) throws BoException" );
+            param = param.substring( 0, param.length() - 2 );
+            sb.append( TAB + "public " + table.getDomName() + " " + methodName + "( "  );
+            sb.append( param + " ) throws BoException" );
             sb.append( "{\n" );
 
             sb.append( TAB + TAB + "SqlSession session = null;\n" );
             sb.append( TAB + TAB + table.getDomName() + " result;\n" );
-            String where = "";
-            for ( int i = 0; i < node.getFieldList().size(); i ++ ) {
-                where += "\"" + node.getFieldList().get( i ) + "='\" + " + node.getVarList().get( i ) + " + \"' and \" + ";
-            }
-            where = where.substring( 0, where.length() - 8 );
-            where += "\";\n";
-            sb.append( TAB + TAB + "String where = " + where);
-
-            sb.append( TAB + TAB + "Map<String, Object> map = new HashMap<String, Object>();\n" );
-            sb.append( TAB + TAB + "map.put( \"where\", where );\n" );
 
             sb.append( TAB + TAB + "try {\n" );
             sb.append( TAB + TAB + TAB + "session = SessionFactory.getSession();\n" );
             sb.append( TAB + TAB + TAB + mapperName );
             sb.append( " mapper = session.getMapper( " + mapperName + ".class );\n" );
-            sb.append( TAB + TAB + TAB + "result = mapper.read( map );\n" );
+            param = "";
+            for(Column col : node.getColumnList()){
+            	param += col.getFldName() + ", ";
+            }
+            param = param.substring( 0, param.length() - 2 );
+            sb.append( TAB + TAB + TAB + "result = mapper." + methodName +"( " + param + " );\n" );
             sb.append( TAB + TAB + TAB + "session.commit();\n\n" );
             sb.append( TAB + TAB + "} catch ( Exception e ) {\n" );
             sb.append( TAB + TAB + TAB + "session.rollback();\n" );
@@ -255,7 +236,6 @@ public class BoGenerator extends Generator {
             sb.append( TAB + TAB + "}\n\n" );
             sb.append( TAB + TAB + "return result;\n" );
             sb.append( TAB + "}\n" );
-
         }
 
         write( sb.toString() );
@@ -311,9 +291,6 @@ public class BoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
-        imports.addImport( "import java.util.Date;");
-        imports.addImport( "import java.util.HashMap;" );
-        imports.addImport( "import java.util.Map;" );
         imports.addImport( "import org.apache.ibatis.session.*;" );
         imports.addImport( "import " + table.getPackage() + ".dao.*;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
