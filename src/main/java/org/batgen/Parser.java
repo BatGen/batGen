@@ -40,8 +40,7 @@ import java.util.regex.Pattern;
 public class Parser {
     private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
     private static ArrayList<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
-    private List<String>                  varList        = new ArrayList<String>();
-    private List<String>                  fieldList      = new ArrayList<String>();
+    private List<Column>                  indexList      = new ArrayList<Column>();
 
     private String                        fileName;
 
@@ -391,8 +390,7 @@ public class Parser {
         if ( indexName == null ) {
             throwException( "Expecting a name for the index." );
         }
-        varList.clear();
-        fieldList.clear();
+        indexList.clear();
         String fieldName = "";
         while ( !isNewLine( token ) ) {
             token = getNextToken();
@@ -402,8 +400,7 @@ public class Parser {
                 contain = false;
                 for ( Column col : table.getColumns() ) {
                     if ( fieldName.equals( col.getFldName() ) ) {
-                        varList.add( fieldName );
-                        fieldList.add( col.getColName() );
+                    	indexList.add( col );
                         contain = true;
                         break;
                     }
@@ -413,9 +410,8 @@ public class Parser {
                 }
             }
         }
-        final List<String> listVar = new ArrayList<String>( varList );
-        final List<String> listCol = new ArrayList<String>( fieldList );
-        table.addIndex( new IndexNode( indexName, listVar, listCol ) );
+        final List<Column> listIndex = new ArrayList<Column>( indexList );
+        table.addIndex( new IndexNode( indexName, listIndex ) );
     }
 
     private void parseForeignKeys( Token token ) {

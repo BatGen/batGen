@@ -42,7 +42,6 @@ public class SqlGenerator extends Generator {
     private final int       SPACE     = 18;
     private String          filePath;
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
-    private List<String>    fieldList = new ArrayList<String>();
     private List<String>    keyList   = new ArrayList<String>();
     private boolean         buildSequence;
 
@@ -143,15 +142,16 @@ public class SqlGenerator extends Generator {
     private String writeIndexes() {
         StringBuilder sb = new StringBuilder();
         indexList = table.getIndexList();
-        for ( int i = 0; i < indexList.size(); i++ ) {
-            sb.append( "\nCREATE INDEX " + indexList.get( i ).getIndexName() );
-            sb.append( " ON " + table.getTableName() + "( " );
-            fieldList = indexList.get( i ).getFieldList();
-            sb.append( fieldList.get( 0 ) );
-            for ( int j = 1; j < fieldList.size(); j++ ) {
-                sb.append( ", " + fieldList.get( j ) );
+        for ( IndexNode node : indexList ) {
+            String param = "";
+            for(Column col : node.getColumnList()){
+            	param += col.getColName() + ", ";
             }
-            sb.append( " );" );
+            param = param.substring( 0, param.length() - 2 );
+            
+            sb.append( "\nCREATE INDEX " + node.getIndexName() );
+            sb.append( " ON " + table.getTableName() + "( " + param + " );" );
+
         }
         sb.append( "\n" );
         return sb.toString();
@@ -161,9 +161,9 @@ public class SqlGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
         sb.append( "SELECT\n    " );
 
-        for ( int i = 0; i < table.getColumns().size(); i++ ) {
-            if ( !"ListColumn".equals( table.getColumn( i ).getClass().getSimpleName() ) ) {
-                sb.append( table.getColumn( i ).getColName().toUpperCase() + ", " );
+        for ( Column col : table.getColumns() ) {
+            if ( !"ListColumn".equals( col.getClass().getSimpleName() ) ) {
+                sb.append( col.getColName().toUpperCase() + ", " );
             }
         }
 

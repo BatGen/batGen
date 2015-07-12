@@ -26,8 +26,11 @@ package org.batgen.generators;
 import static org.batgen.generators.GenUtil.writeToFile;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.batgen.Column;
+import org.batgen.IndexNode;
 import org.batgen.Table;
 
 /**
@@ -40,12 +43,19 @@ public class DaoGenerator extends Generator {
     private StringBuilder sb      = new StringBuilder();
     private final String  TAB     = "    ";
     private String        filePath;
+    private List<Column> keyColumns = new ArrayList<Column>();
+
 
     public DaoGenerator( Table table ) {
         super( table );
         this.table = table;
         daoName = table.getDomName() + "Dao";
         filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName + ".java";
+        for ( Column column : table.getColumns() ) {
+            if ( column.isKey() ) {
+                keyColumns.add(column);
+            }
+        }
     }
 
     public String createDao() {
@@ -85,11 +95,9 @@ public class DaoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
-        if ( !table.getIndexList().isEmpty() )
-            imports.addImport( "import java.util.Map;" );
-        imports.addImport( "import java.util.Map;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
         imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
+        imports.addImport( "import org.apache.ibatis.annotations.Param;" );
 
         write( imports.toString() );
     }
@@ -105,8 +113,27 @@ public class DaoGenerator extends Generator {
         write( " value ) throws DaoException;\n\n" );
         write( TAB + "public int update( " + table.getDomName() );
         write( " value ) throws DaoException;\n\n" );
-        write( TAB + "public int delete( Map<String, Object> map ) throws DaoException;\n\n" );
-        write( TAB + "public " + table.getDomName() + " read( Map<String, Object> map ) throws DaoException;\n\n" );
+        
+        String param = "";
+        for(Column col : keyColumns){
+        	param += "@Param( \"" + col.getFldName() + "\" ) " + col.getFldType() + " " + col.getFldName() + ", ";
+        }
+        param = param.substring( 0, param.length() - 2 );
+        
+        write( TAB + "public int delete( " + param + " ) throws DaoException;\n\n" );
+        write( TAB + "public " + table.getDomName() + " read( " + param + " ) throws DaoException;\n\n" );
+        
+        for ( IndexNode node : table.getIndexList() ) {
+        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
+            param = "";
+            for(Column col : node.getColumnList()){
+            	param += "@Param( \"" + col.getFldName() + "\" ) " + col.getFldType() + " " + col.getFldName() + ", ";
+            }
+            param = param.substring( 0, param.length() - 2 );
+            
+            write( TAB + "public " + table.getDomName() + " " + methodName + "( " + param + " ) throws DaoException;\n\n" );
+        }
+        
     }
 
     private void writeList() {

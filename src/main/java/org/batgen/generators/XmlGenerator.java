@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.batgen.Column;
 import org.batgen.DatabaseType;
+import org.batgen.IndexNode;
 import org.batgen.Table;
 
 public class XmlGenerator extends Generator {
@@ -39,6 +40,8 @@ public class XmlGenerator extends Generator {
     private List<String>     sqlVariables      = null;
     private List<String>     javaVariables     = null;
     private List<Column>     searchableColumns = null;
+    private List<Column>     keyColumns        = new ArrayList<Column>();
+
 
     private String           daoName           = "";
     private String           filePath;
@@ -50,6 +53,11 @@ public class XmlGenerator extends Generator {
         this.databaseType = databaseType;
         filePath = "src/main/resources/" + packageToPath() + "/dao/" + daoName + ".xml";
         filePath = filePath.replace( "_", "" );
+        for ( Column column : table.getColumns() ) {
+            if ( column.isKey() ) {
+                keyColumns.add(column);
+            }
+        }
     }
 
     public String createXml() {
@@ -66,6 +74,7 @@ public class XmlGenerator extends Generator {
         sb.append( createGetListBy() );
         sb.append( createUpdate() );
         sb.append( createDelete() );
+        sb.append( createIndex() );
         sb.append( getProtectedJavaLines( filePath ) );
 
         writeToFile( filePath, sb.toString() );
@@ -120,6 +129,12 @@ public class XmlGenerator extends Generator {
     }
 
     private String createRead() {
+        String param = "";
+        for(Column col : keyColumns){
+        	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+        }
+        param = param.substring( 0, param.length() - 5 );
+        
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
@@ -127,9 +142,8 @@ public class XmlGenerator extends Generator {
 
         sb.append( TAB + "<select id=\"read\" parameterType=\"map\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
         
-        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" + TAB + TAB + "where "
-                + "${where}\n" );
-
+        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n");
+        sb.append( TAB + TAB + "where " + param + "\n");
         sb.append( TAB + "</select>\n" );
 
         return sb.toString();
@@ -238,15 +252,44 @@ public class XmlGenerator extends Generator {
     }
 
     private String createDelete() {
+        String param = "";
+        for(Column col : keyColumns){
+        	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+        }
+        param = param.substring( 0, param.length() - 5 );
+        
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
         sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\"map\">\n");
 
         sb.append( TAB + TAB + "delete from " + table.getTableName().toUpperCase() + "\n" );
-        sb.append( TAB + TAB + "where ${where}\n" );
+        sb.append( TAB + TAB + "where " + param + "\n" );
         sb.append( TAB + "</delete>" );
 
+        return sb.toString();
+    }
+    
+    private String createIndex(){
+        StringBuilder sb = new StringBuilder();
+
+        for ( IndexNode node : table.getIndexList() ) {
+        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
+            String param = "";
+            for(Column col : node.getColumnList()){
+            	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+            }
+            param = param.substring( 0, param.length() - 5 );
+
+            sb.append( "\n" );
+            sb.append( "\n" );
+
+            sb.append( TAB + "<select id=\"" + methodName + " \" parameterType=\"map\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
+            
+            sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n");
+            sb.append( TAB + TAB + "where " + param + "\n");
+            sb.append( TAB + "</select>\n" );
+            }
         return sb.toString();
     }
 
