@@ -30,7 +30,7 @@ The tables used are formatted in an acceptable manner for the application to cre
       * If the data type is an timestamp then you must also specify a precision (precision of the seconds ).
       * If the data type is an vstring, then you must also specify a magnitude (total number of digits) and also a comment section with the sql-statement on how to retrieve it surrounded by `. 
    4. The special characters that are allowed are !, *, ? and -.
-      * ! signifies that the column is a primary key to the table. There can only be one primary key and it can only be              defined as a LONG(some value) or STRING(some value). If you do not create a key column, one will be automatically            generated for you.
+      * ! signifies that the column is a primary key to the table. There can be multiple primary keys, but at least one has          to be defined as a LONG(some value) or STRING(some value). If you do not create a key column, one will be                    automatically generated for you.
       * * signifies that the column is required, and cannot be null.
       * ? signifies that the column is a searchable ID, used to get an list of all objects with same the ID.
       * - signifies that the column has it's sequence disabled.
