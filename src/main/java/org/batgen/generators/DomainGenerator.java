@@ -37,7 +37,7 @@ public class DomainGenerator extends Generator {
     private StringBuilder sb          = new StringBuilder();
     private StringBuilder flds        = new StringBuilder();
     private StringBuilder getsSets    = new StringBuilder();
-    boolean               date;
+    private boolean               date;
 
     private final int     FLD_SPACE   = 9;
     private final String  SPACE       = "    ";
@@ -100,6 +100,9 @@ public class DomainGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( date )
             imports.addImport( IMPORT_DATE );
+        if ( table.hasSuperClass() && table.getSuperClassName().contains(".")) {
+        	imports.addImport("import " + table.getSuperClassName() + ";");
+        }
         sb.append( imports.toString() );
 
     }
@@ -107,6 +110,17 @@ public class DomainGenerator extends Generator {
     private void writeClass() {
         sb.append( "public class " );
         sb.append( domName );
+        if ( table.hasSuperClass() ) {
+        	String sClass = table.getSuperClassName();
+        	sb.append(" extends ");
+        	int lastDot = sClass.lastIndexOf('.');
+        	if ( lastDot != -1 ) {
+        		sb.append(table.getSuperClassName().substring(lastDot + 1));
+        	} 
+        	else {
+        		sb.append(sClass);
+        	}
+        }
         sb.append( " {" );
     }
 

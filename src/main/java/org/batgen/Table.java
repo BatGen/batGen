@@ -32,6 +32,7 @@ public class Table {
     private String pkg;
     private String domName;
     private String tableName;
+    private String superClassName;
     private boolean hasSearch = false;
     private List<Column> columns = new ArrayList<Column>();
     private List<String> searchList = new ArrayList<String>();
@@ -67,6 +68,14 @@ public class Table {
     public String getTableName() {
         return tableName;
     }
+    
+	public String getSuperClassName() {
+		return superClassName;
+	}
+
+	public void setSuperClassName(String superClassName) {
+		this.superClassName = superClassName;
+	}
 
     public void setPackage( String p ) {
         pkg = p;
@@ -166,5 +175,10 @@ public class Table {
     public void setup() {
         setKeyToFirstElement();
         createSearchList();
+    }
+
+    public boolean hasSuperClass()
+    {
+    	return superClassName != null && !superClassName.isEmpty();
     }
 }

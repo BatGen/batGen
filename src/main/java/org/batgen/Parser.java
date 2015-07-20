@@ -156,8 +156,16 @@ public class Parser {
             table.setTableName( token.getValue() );
 
         }
+        else if ( token.equals( "EXTENDS" ) ) {
+            token = getNextToken();
+
+            if ( isNewLine( token ) ) {
+                throwException( "Expected a superclass name, recieved new line." );
+            }
+            table.setSuperClassName( token.getValue() );
+        }
         else {
-            throwException( "Unexpected token, expected CLASS" );
+            throwException( "Unexpected token, expected CLASS or EXTENDS" );
         }
     }
 

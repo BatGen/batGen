@@ -39,9 +39,12 @@ import org.batgen.Table;
 public class BoGenerator extends Generator {
     String        boName  = "";
     StringBuilder sb      = new StringBuilder();
-    final String  NEWLINE = "\n";
+    
     private List<Column> keyColumns = new ArrayList<Column>();
     String        filePath;
+    
+    final String  NEWLINE = "\n";
+    private final String  IMPORT_DATE = "import java.util.Date;";
 
     public BoGenerator( Table table ) {
         super( table );
@@ -291,6 +294,17 @@ public class BoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
+       
+        boolean date = false;
+        for ( Column col : table.getColumns() ) {
+        	if (col.getFldType().equals( "Date" )) {
+        		date = true;
+        	}
+        }
+        if (date) {
+        	imports.addImport(IMPORT_DATE);
+        }
+        
         imports.addImport( "import org.apache.ibatis.session.*;" );
         imports.addImport( "import " + table.getPackage() + ".dao.*;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );

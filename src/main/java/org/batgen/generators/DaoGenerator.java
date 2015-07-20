@@ -39,11 +39,13 @@ import org.batgen.Table;
 public class DaoGenerator extends Generator {
     private Table         table;
     private String        daoName = "";
-
+    
     private StringBuilder sb      = new StringBuilder();
-    private final String  TAB     = "    ";
     private String        filePath;
     private List<Column> keyColumns = new ArrayList<Column>();
+    
+    private final String  TAB     = "    ";
+    private final String  IMPORT_DATE = "import java.util.Date;";
 
 
     public DaoGenerator( Table table ) {
@@ -59,6 +61,7 @@ public class DaoGenerator extends Generator {
     }
 
     public String createDao() {
+    	
         writePkg();
         writeImport();
         writeInterface();
@@ -95,6 +98,17 @@ public class DaoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
+        
+        boolean date = false;
+        for ( Column col : table.getColumns() ) {
+        	if (col.getFldType().equals( "Date" )) {
+        		date = true;
+        	}
+        }
+        if (date) {
+        	imports.addImport(IMPORT_DATE);
+        }
+        
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
         imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
         imports.addImport( "import org.apache.ibatis.annotations.Param;" );
