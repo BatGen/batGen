@@ -30,12 +30,30 @@ public class Column {
     private String    colName;
     private String    comment;
     private Table     table;
-
+    
+    private boolean   isLinkGenerated = false;
     private boolean   key;
     private boolean   required;
     private boolean   sequenceDisable;
     private boolean   searchId;
     private boolean   sysTimestamp;
+
+    public Column(Column another) {
+        this.type = another.getType();
+        this.fldName = another.getFldName();
+        this.colName = another.getColName();
+        this.comment = another.getComments();
+        this.table = another.getTable();
+        this.key = another.key;
+        this.required = another.isRequired();
+        this.sequenceDisable = another.isSequenceDisabled();
+        this.searchId = another.isSearchId();
+        this.sysTimestamp = another.isSysTimestamp();
+      }
+    
+    public Column() {
+        // TODO Auto-generated constructor stub
+    }
 
     public void setType( FieldType type ) {
         this.type = type;
@@ -112,7 +130,7 @@ public class Column {
     }
     
     public void setSysTimestamp() {
-    	sysTimestamp = true;
+        sysTimestamp = true;
     }
 
     public boolean isSysTimestamp() {
@@ -132,5 +150,13 @@ public class Column {
         return "Column: fldName=" + fldName + ", colName=" + colName + ", fldType=" + getFldType() + ", colType="
                 + getSqlType() + ", comment=" + comment + ", required=" + isRequired() + ", key=" + isKey()
                 + ", sequenceDisable=" + isSequenceDisabled() + ", searchable=" + isSearchId();
+    }
+
+    public boolean isLinkGenerated() {
+        return isLinkGenerated;
+    }
+
+    public void setLinkGenerated(boolean isLinkGenerated) {
+        this.isLinkGenerated = isLinkGenerated;
     }
 }

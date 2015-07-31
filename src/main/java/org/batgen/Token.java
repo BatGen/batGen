@@ -30,7 +30,7 @@ public class Token {
     private String value = "";
 
     public enum Type {
-        COMMENT, ERROR, HEADER, LIST, NEWLINE, SPECIALCHAR, WORD
+        COMMENT, ERROR, HEADER, LIST, NEWLINE, SPECIALCHAR, WORD, ARROW
     }
 
     private Type type;

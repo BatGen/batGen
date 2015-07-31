@@ -144,6 +144,7 @@ public class SessionFactoryGenerator {
                 + "public static SqlSession getSession() {\n" + TAB + TAB
                 + "return ssf.openSession();\n" + TAB + "}\n" + "\n" + TAB
                 + "public static void initialize(){\n" + TAB + TAB
+                + "ENVIRONMENT = \"H2\";\n" + TAB + TAB
                 + "setup();\n" + TAB + "}\n" + "\n" + TAB
                 + "public static void initializeForTest(){\n" + TAB + TAB
                 + "ENVIRONMENT = \"TESTING\";\n" + TAB + TAB + "setup();\n"

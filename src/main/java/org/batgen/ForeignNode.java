@@ -1,16 +1,18 @@
 package org.batgen;
 
+import java.util.ArrayList;
+
 public class ForeignNode {
     private String fromTable;
-    private String fromField;
+    private ArrayList<String> fromFields;
     private String toTable;
-    private String toField;
+    private ArrayList<String> toFields;
 
-    public ForeignNode(String fromTable, String fromField, String toTable, String toField){
+    public ForeignNode(String fromTable, ArrayList<String> fromFields, String toTable, ArrayList<String> toFields){
         this.setFromTable( fromTable );
-        this.setFromField( fromField );
+        this.setFromFields( fromFields );
         this.setToTable( toTable );
-        this.setToField( toField );
+        this.setToFields( toFields );
     }
 
     public String getFromTable() {
@@ -21,12 +23,12 @@ public class ForeignNode {
         this.fromTable = fromTable;
     }
 
-    public String getFromField() {
-        return fromField;
+    public ArrayList<String> getFromFields() {
+        return fromFields;
     }
 
-    public void setFromField( String fromField ) {
-        this.fromField = fromField;
+    public void setFromFields( ArrayList<String> fromFields ) {
+        this.fromFields = fromFields;
     }
 
     public String getToTable() {
@@ -37,11 +39,12 @@ public class ForeignNode {
         this.toTable = toTable;
     }
 
-    public String getToField() {
-        return toField;
+    public ArrayList<String> getToFields() {
+        return toFields;
     }
 
-    public void setToField( String toField ) {
-        this.toField = toField;
+    public void setToFields( ArrayList<String> toFields ) {
+        this.toFields = toFields;
     }
+
 }

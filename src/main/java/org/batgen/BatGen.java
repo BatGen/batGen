@@ -32,11 +32,13 @@ import org.batgen.generators.BoGenerator;
 import org.batgen.generators.DaoGenerator;
 import org.batgen.generators.DomainGenerator;
 import org.batgen.generators.ForeignKeyGenerator;
+import org.batgen.generators.GenUtil;
+import org.batgen.generators.LinkGenerator;
 import org.batgen.generators.MybatisConfigGenerator;
 import org.batgen.generators.SessionFactoryGenerator;
 import org.batgen.generators.SqlGenerator;
 import org.batgen.generators.TestBoGenerator;
-import org.batgen.generators.TestDaoGenerator;
+import org.batgen.generators.TestUtilGenerator;
 import org.batgen.generators.XmlGenerator;
 
 /**
@@ -44,13 +46,13 @@ import org.batgen.generators.XmlGenerator;
  * 
  */
 public class BatGen {
-    private String       basePkg;
-    private String       configPath;
+    private String basePkg;
+    private String configPath;
 
     private DatabaseType databaseType;
 
-    private boolean      allFiles;
-    private int          fileCount;
+    private boolean allFiles;
+    private int fileCount;
 
     /**
      * Initializes the code generator.
@@ -91,15 +93,15 @@ public class BatGen {
     public void run() {
 
         System.out.println( "Press [Enter] to process all config files or "
-                + "enter a comma separate list of config files.\n\n" + "Available Files: \n\n" + getList() + "\n\n" );
+                + "enter a comma separate list of config files.\n\n" + "Available Files: \n\n"
+                + getList() + "\n\n" );
 
         Scanner scan = new Scanner( System.in );
         String userInput = scan.nextLine();
 
         if ( userInput.isEmpty() ) {
             allFiles = true;
-        }
-        else {
+        } else {
             allFiles = false;
         }
 
@@ -122,8 +124,7 @@ public class BatGen {
                 }
             }
 
-        }
-        else {
+        } else {
 
             // call parse with a subset of available files in this directory
             String[] inputFiles = userInput.split( "," );
@@ -132,6 +133,7 @@ public class BatGen {
             }
 
         }
+        
         processFiles( fileList );
         scan.close();
     }
@@ -165,30 +167,73 @@ public class BatGen {
         Table table = null;
         List<String> classNames = new ArrayList<String>();
 
+        ArrayList<Table> tables = new ArrayList<Table>();
         for ( String file : files ) {
             table = parser.parse( file );
             table.setPackage( basePkg );
             if ( classNames.contains( table.getDomName() ) ) {
-                throw new IllegalArgumentException( "This class name is used multiple times, " + table.getDomName() );
+                throw new IllegalArgumentException( "This class name is used multiple times, "
+                        + table.getDomName() );
             }
             classNames.add( table.getDomName() );
-            generateAll( table );
+            tables.add( table );
         }
 
-        ForeignKeyGenerator foreignKey = new ForeignKeyGenerator( Parser.getForeignKeyList(), Parser.getTableMap() );
+        LinkGenerator lg = new LinkGenerator( Parser.getLinkList(), Parser.getTableMap() );
+        lg.createLinks();
+
+        for ( Table t : tables ) {
+            generateAll( t );
+        }
+
+        ForeignKeyGenerator foreignKey = new ForeignKeyGenerator( Parser.getForeignKeyList(),
+                Parser.getTableMap() );
         foreignKey.createForeignKeys();
+
+        writeDrops( tables );
 
         SessionFactoryGenerator sfg = new SessionFactoryGenerator( basePkg );
         printPath( sfg.createSession() );
 
         MybatisConfigGenerator mcg = new MybatisConfigGenerator( classNames, basePkg, databaseType );
         printPath( mcg.createConfiguration() );
-
+        
+        TestUtilGenerator utilGen = new TestUtilGenerator( basePkg );
+        printPath( utilGen.writeDatabase() );
+        printPath( utilGen.writeGenUtil() );
+        
         printPath( "sql/_CreateTables.sql" );
         printPath( "sql/_AlterTables.sql" );
         printPath( "sql/_DropTables.sql" );
 
         System.out.println( "\nDone." );
+    }
+
+    private void writeDrops( ArrayList<Table> tables ) {
+        StringBuilder sb = new StringBuilder();
+
+        for ( Table t : tables ) {
+            sb.append( drop( t ) + "\n" );
+        }
+        GenUtil.appendToFile( "sql/_DropTables.sql", sb.toString() );
+    }
+
+    private String drop( Table t ) {
+        StringBuilder sb = new StringBuilder();
+        sb.append( "DROP TABLE " + t.getTableName() + ";\n" );
+
+        if ( sequenceCheck( t ) ) {
+            sb.append( "DROP SEQUENCE " + t.getTableName() + "_SEQ;\n" );
+        }
+
+        return sb.toString();
+
+    }
+
+    private boolean sequenceCheck( Table t ) {
+        return ( !t.getColumn( 0 ).isSequenceDisabled()
+                && !t.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" )
+                && t.getColumn( 0 ).isKey() && !t.isManyToMany() );
     }
 
     protected String getList() {
@@ -235,9 +280,6 @@ public class BatGen {
         SqlGenerator sql = new SqlGenerator( table );
         printPath( sql.createSql() );
 
-        TestDaoGenerator testDao = new TestDaoGenerator( table );
-        printPath( testDao.createTestDao() );
-
         TestBoGenerator testBo = new TestBoGenerator( table );
         printPath( testBo.createTestBo() );
 
@@ -248,7 +290,8 @@ public class BatGen {
         if ( file == null ) {
             System.out.println( fileCount + ". MyBatis configuration already exists." );
             return;
+        } else if ( !file.isEmpty() ) {
+            System.out.println( fileCount + ". " + file );
         }
-        System.out.println( fileCount + ". " + file );
     }
 }

@@ -125,5 +125,12 @@ public class GenUtil {
 
         return protectedLines;
     }
+    
+    public static String capitalize( String value ) {
+        String line = value;
+
+        line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );
+        return line;
+    }
 
 }

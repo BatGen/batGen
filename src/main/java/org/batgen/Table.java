@@ -24,24 +24,34 @@
 package org.batgen;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.batgen.generators.GenUtil;
 
 public class Table {
+
+    // Covers use of the LINK field in settings for many-many tables
+    private boolean isManyToMany = false;
+    private Table tableOne = null;
+    private Table tableTwo = null;
 
     private String comment;
     private String pkg;
     private String domName;
     private String tableName;
+    private String superClassName;
     private boolean hasSearch = false;
     private List<Column> columns = new ArrayList<Column>();
     private List<String> searchList = new ArrayList<String>();
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
+    private List<ForeignNode> foreignList = new ArrayList<ForeignNode>();
 
     int count = 0;
 
     public String toString() {
-        String first = "The table, " + domName + " is located in " + pkg
-                + ", its fields are: ";
+        String first = "The table, " + domName + " is located in " + pkg + ", its fields are: ";
         StringBuilder sb = new StringBuilder( first );
 
         for ( int i = 0; i < columns.size(); i++ ) {
@@ -68,6 +78,14 @@ public class Table {
         return tableName;
     }
 
+    public String getSuperClassName() {
+        return superClassName;
+    }
+
+    public void setSuperClassName( String superClassName ) {
+        this.superClassName = superClassName;
+    }
+
     public void setPackage( String p ) {
         pkg = p;
     }
@@ -85,10 +103,12 @@ public class Table {
     }
 
     public void addColumn( Column c ) {
+        c.setTable( this );
         columns.add( c );
     }
 
     public void addColumn( int num, Column c ) {
+        c.setTable( this );
         columns.add( num, c );
     }
 
@@ -100,34 +120,46 @@ public class Table {
         return columns.get( i );
     }
 
-    private void setKeyToFirstElement() {
-
-        Column column;
-        for ( int i = 0; i < columns.size(); i++ ) {
-            column = columns.get( i );
-
-            if ( column.isKey() ) {
-                if ( i == 0 )
-                    return;
-
-                columns.remove( i );
-                columns.add( 0, column );
-                return;
+    public ArrayList<Column> getKeyColumns() {
+        ArrayList<Column> ret = new ArrayList<Column>();
+        for ( Column c : columns ) {
+            if ( c.isKey() ) {
+                ret.add( c );
             }
         }
+        return ret;
+    }
 
-        // if we are still here, no key was found.
-        LengthColumn keyCol = new LengthColumn();
-        keyCol.setColName( "KEY" );
-        keyCol.setType( FieldType.LONG );
-        keyCol.setFldName( "key" );
-        keyCol.setKey();
-        keyCol.setColLen( "10" );
-        if(columns.get( 0 ).isSequenceDisabled()){
-            keyCol.setSequenceDisabled();
+    private void setKeyToFirstElement() {
+
+        if ( !this.isManyToMany ) {
+            Column column;
+            for ( int i = 0; i < columns.size(); i++ ) {
+                column = columns.get( i );
+
+                if ( column.isKey() ) {
+                    if ( i == 0 )
+                        return;
+
+                    columns.remove( i );
+                    columns.add( 0, column );
+                    return;
+                }
+            }
+
+            // if we are still here, no key was found.
+            LengthColumn keyCol = new LengthColumn();
+            keyCol.setColName( "KEY" );
+            keyCol.setType( FieldType.LONG );
+            keyCol.setFldName( "key" );
+            keyCol.setKey();
+            keyCol.setColLen( "10" );
+            if ( columns.get( 0 ).isSequenceDisabled() ) {
+                keyCol.setSequenceDisabled();
+            }
+
+            this.addColumn( 0, keyCol );
         }
-
-        columns.add( 0, keyCol );
     }
 
     private void createSearchList() {
@@ -148,11 +180,20 @@ public class Table {
         return hasSearch;
     }
 
-    public void addIndex(IndexNode node){
+    public void addIndex( IndexNode node ) {
         indexList.add( node );
     }
+
     public List<IndexNode> getIndexList() {
         return indexList;
+    }
+    
+    public void addFN( ForeignNode node ) {
+        foreignList.add( node );
+    }
+
+    public List<ForeignNode> getForeignList() {
+        return this.foreignList;
     }
 
     /**
@@ -167,4 +208,41 @@ public class Table {
         setKeyToFirstElement();
         createSearchList();
     }
+
+    public boolean hasSuperClass() {
+        return superClassName != null && !superClassName.isEmpty();
+    }
+
+    public boolean isManyToMany() {
+        return isManyToMany;
+    }
+
+    public void setManyToMany( boolean isManyToMany ) {
+        this.isManyToMany = isManyToMany;
+    }
+
+    public Table getTableOne() {
+        return tableOne;
+    }
+
+    public void setTableOne( Table tableOne ) {
+        this.tableOne = tableOne;
+    }
+
+    public Table getTableTwo() {
+        return tableTwo;
+    }
+
+    public void setTableTwo( Table tableTwo ) {
+        this.tableTwo = tableTwo;
+    }
+    
+    public Set<String> getForeignDomNames() {
+    	Set<String> set = new HashSet<String>();
+    	for (ForeignNode fn : foreignList) {
+    		set.add(GenUtil.capitalize(Parser.capsToCamel(fn.getToTable())));
+    	}
+    	return set;
+    }
+
 }

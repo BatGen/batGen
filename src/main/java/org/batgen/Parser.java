@@ -38,16 +38,18 @@ import java.util.regex.Pattern;
  * files.
  */
 public class Parser {
-    private static HashMap<String, Table> tableMap       = new HashMap<String, Table>();
-    private static ArrayList<ForeignNode>      foreignKeyList = new ArrayList<ForeignNode>();
-    private List<Column>                  indexList      = new ArrayList<Column>();
+    private static HashMap<String, Table> tableMap = new HashMap<String, Table>();
+    private static ArrayList<ForeignNode> foreignKeyList = new ArrayList<ForeignNode>();
+    private static ArrayList<LinkNode> linkList = new ArrayList<LinkNode>();
 
-    private String                        fileName;
+    private List<Column> indexList = new ArrayList<Column>();
 
-    private Table                         table;
-    private Tokenizer                     tokenizer;
+    private String fileName;
 
-    private boolean                       fStop;
+    private Table table;
+    private Tokenizer tokenizer;
+
+    private boolean fStop;
 
     /**
      * Initialize - initializes all global variables - this function must reset
@@ -87,42 +89,33 @@ public class Parser {
         while ( token != null ) {
             if ( isNewLine( token ) ) {
                 // do nothing
-            }
-            else if ( token.isComment() ) {
+            } else if ( token.isComment() ) {
                 table.setComment( token.getValue() );
-            }
-            else if ( token.equals( "[Settings]" ) ) {
+            } else if ( token.equals( "[Settings]" ) ) {
                 classSettings = true;
                 foreignSettings = false;
                 indexesSetting = false;
-            }
-            else if ( token.equals( "[Fields]" ) ) {
+            } else if ( token.equals( "[Fields]" ) ) {
                 classSettings = false;
                 foreignSettings = false;
                 indexesSetting = false;
-            }
-            else if ( token.equals( "[Indexes]" ) ) {
+            } else if ( token.equals( "[Indexes]" ) ) {
                 indexesSetting = true;
                 foreignSettings = false;
                 classSettings = false;
-            }
-            else if ( token.equals( "[ForeignKeys]" ) ) {
+            } else if ( token.equals( "[ForeignKeys]" ) ) {
                 foreignSettings = true;
                 classSettings = false;
                 indexesSetting = false;
-            }
-            else if ( classSettings ) {
+            } else if ( classSettings ) {
                 parseSettings( token );
                 if ( fStop )
                     return table;
-            }
-            else if ( indexesSetting ) {
+            } else if ( indexesSetting ) {
                 parseIndexes( token );
-            }
-            else if ( foreignSettings ) {
+            } else if ( foreignSettings ) {
                 parseForeignKeys( token );
-            }
-            else {
+            } else {
                 parseFields( token );
             }
             token = getNextToken();
@@ -155,9 +148,42 @@ public class Parser {
                 return;
             table.setTableName( token.getValue() );
 
-        }
-        else {
-            throwException( "Unexpected token, expected CLASS" );
+        } else if ( token.equals( "EXTENDS" ) ) {
+            token = getNextToken();
+
+            if ( isNewLine( token ) ) {
+                throwException( "Expected a superclass name, recieved new line." );
+            }
+            table.setSuperClassName( token.getValue() );
+        } else if ( token.equals( "LINK" ) ) {
+            token = getNextToken();
+
+            String tableOne = null;
+            String tableTwo = null;
+            if ( token.isWord() ) {
+                tableOne = token.getValue();
+                token = getNextToken();
+            } else {
+                throwException( "Error parsing class name in LINK" );
+            }
+
+            if ( token.isWord() ) {
+                tableTwo = token.getValue();
+            } else {
+                throwException( "Error parsing class name in LINK" );
+            }
+
+            if ( table.getTableName() == null ) {
+                throwException( "Must specify CLASS before LINK" );
+            } else {
+                LinkNode ln = new LinkNode( table.getTableName(), camelToCaps( tableOne ),
+                        camelToCaps( tableTwo ) );
+                table.setManyToMany( true );
+                linkList.add( ln );
+            }
+
+        } else {
+            throwException( "Unexpected token, expected CLASS, EXTENDS or LINK" );
         }
     }
 
@@ -181,7 +207,7 @@ public class Parser {
             table = existingTable;
             return;
         }
-        tableMap.put( value, table );
+        tableMap.put( camelToCaps( value ), table );
 
     }
 
@@ -195,8 +221,7 @@ public class Parser {
 
         if ( !token.isWord() ) {
             throwException( "Expecting type." );
-        }
-        else {
+        } else {
             parseCommonFields( token );
         }
     }
@@ -208,15 +233,13 @@ public class Parser {
             column = new Column();
             column.setType( FieldType.DATE );
             token = getNextToken();
-        }
-        else if ( token.equals( FieldType.BOOLEAN ) ) {
+        } else if ( token.equals( FieldType.BOOLEAN ) ) {
             LengthColumn lenCol = new LengthColumn();
             lenCol.setType( FieldType.BOOLEAN );
             lenCol.setColLen( "1" );
             token = getNextToken();
             column = lenCol;
-        }
-        else if ( token.equals( FieldType.DOUBLE ) ) {
+        } else if ( token.equals( FieldType.DOUBLE ) ) {
             DoubleColumn doubleColumn = new DoubleColumn();
             doubleColumn.setType( FieldType.DOUBLE );
 
@@ -247,22 +270,18 @@ public class Parser {
 
             column = doubleColumn;
             token = getNextToken();
-        }
-        else if ( token.equals( FieldType.BLOB ) ) {
+        } else if ( token.equals( FieldType.BLOB ) ) {
             column = new BlobColumn();
             column.setType( FieldType.BLOB );
             token = getNextToken();
-        }
-        else if ( token.equals( FieldType.CLOB ) ) {
+        } else if ( token.equals( FieldType.CLOB ) ) {
             column = new BlobColumn();
             column.setType( FieldType.CLOB );
             token = getNextToken();
-        }
-        else if ( token.equals( FieldType.VSTRING ) ) {
+        } else if ( token.equals( FieldType.VSTRING ) ) {
             column = getVirtualColumn( token );
             token = getNextToken();
-        }
-        else {
+        } else {
             column = getLengthColumn( token );
             token = getNextToken();
         }
@@ -299,18 +318,14 @@ public class Parser {
 
         if ( token.equals( FieldType.LONG ) ) {
             column.setType( FieldType.LONG );
-        }
-        else if ( token.equals( FieldType.INTEGER ) ) {
+        } else if ( token.equals( FieldType.INTEGER ) ) {
             column.setType( FieldType.INTEGER );
-        }
-        else if ( token.equals( FieldType.STRING ) ) {
+        } else if ( token.equals( FieldType.STRING ) ) {
             column.setType( FieldType.STRING );
-        }
-        else if ( token.equals( FieldType.TIMESTAMP ) ) {
+        } else if ( token.equals( FieldType.TIMESTAMP ) ) {
             column.setType( FieldType.TIMESTAMP );
-        }
-        else {
-            throwException( "Unhandled Type. Expected DOUBLE, STRING, LONG, INTEGER, BLOB, CLOB, BOOLEAN, DATE or VSTRING.");
+        } else {
+            throwException( "Unhandled Type. Expected DOUBLE, STRING, LONG, INTEGER, BLOB, CLOB, BOOLEAN, DATE or VSTRING." );
         }
 
         token = getNextToken();
@@ -345,38 +360,31 @@ public class Parser {
 
             if ( token.isKey() ) {
                 column.setKey();
-            }
-            else if ( token.isRequired() ) {
+            } else if ( token.isRequired() ) {
                 column.setRequired();
-            }
-            else if ( token.isSequenceDisabled() ) {
+            } else if ( token.isSequenceDisabled() ) {
                 column.setSequenceDisabled();
-            }
-            else if ( token.isComment() ) {
+            } else if ( token.isComment() ) {
                 column.setComment( token.getValue() );
-                //parse the sql command from comment if it's an virtual column
+                // parse the sql command from comment if it's an virtual column
                 if ( column.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
-                    Pattern spaces = Pattern.compile("`");
-                    String parts[] = spaces.split(token.getValue());
-                    if(parts.length == 1){
+                    Pattern spaces = Pattern.compile( "`" );
+                    String parts[] = spaces.split( token.getValue() );
+                    if ( parts.length == 1 ) {
                         throwException( "Expecting `sql statement`." );
                     }
-                    ( (VirtualStringColumn) column ).setSqlCommand(parts[1]);
+                    ( ( VirtualStringColumn ) column ).setSqlCommand( parts[1] );
                 }
 
-            }
-            else if ( token.isSearchId() ) {
+            } else if ( token.isSearchId() ) {
                 column.setSearchId();
-            }
-            else if ( token.isSysTime() ) {
-            	column.setSysTimestamp();
-            }
-            else if ( token.isWord() ) {
+            } else if ( token.isSysTime() ) {
+                column.setSysTimestamp();
+            } else if ( token.isWord() ) {
                 if ( column.getFldName() == null ) {
                     column.setFldName( token.getValue() );
                     column.setColName( camelToCaps( token ) );
-                }
-                else {
+                } else {
                     column.setColName( token.getValue() );
                 }
             }
@@ -400,13 +408,14 @@ public class Parser {
                 contain = false;
                 for ( Column col : table.getColumns() ) {
                     if ( fieldName.equals( col.getFldName() ) ) {
-                    	indexList.add( col );
+                        indexList.add( col );
                         contain = true;
                         break;
                     }
                 }
                 if ( !contain ) {
-                    throwException( "The fields is not contained in the table: " + table.getDomName() );
+                    throwException( "The fields is not contained in the table: "
+                            + table.getDomName() );
                 }
             }
         }
@@ -415,21 +424,73 @@ public class Parser {
     }
 
     private void parseForeignKeys( Token token ) {
-        String thisTable = table.getDomName();
-        String thisField = token.getValue();
-        if ( !getNextToken().getValue().equals( "constrainsTo" ) )
-            throwException( "Expecting keywords 'constrainsTo" );
+        String fromTable = table.getDomName();
+        String toTable;
+        ArrayList<String> fromFields = new ArrayList<String>();
+        ArrayList<String> toFields = new ArrayList<String>();
+        fromFields.add( token.getValue() );
 
-        String other[] = getNextToken().getValue().split( "\\." );
-        foreignKeyList.add( new ForeignNode( thisTable, thisField, other[0], other[1] ) );
+        Token next = getNextToken();
+        while ( !( next.getValue().equals( "=>" ) || next.getValue().equals( "constrainsTo" ) ) ) {
+
+            if ( !( next.isComma() || next.isWord() ) ) {
+                throwException( "Expecting comma or word" );
+            }
+
+            if ( next.isWord() ) {
+                fromFields.add( next.getValue() );
+            }
+
+            next = getNextToken();
+        }
+
+        next = getNextToken();
+
+        if ( !next.isWord() ) {
+            throwException( "Expecting refernce class" );
+        }
+
+        toTable = next.getValue();
+
+        next = getNextToken();
+
+        if ( !next.isOpenParen() ) {
+            throwException( "Expecting opening parenthesie '('" );
+        }
+
+        next = getNextToken();
+
+        while ( !( next.isCloseParen() ) && ( next.isComma() || next.isWord() ) ) {
+
+            if ( !( next.isComma() || next.isWord() ) ) {
+                throwException( "Expecting comma or word" );
+            }
+
+            if ( next.isWord() ) {
+                toFields.add( next.getValue() );
+            }
+
+            next = getNextToken();
+        }
+
+        if ( fromFields.size() != toFields.size() ) {
+            throwException( "The number of references in this FK on the right does not match the left." );
+        }
+                
+        ForeignNode fn = new ForeignNode( camelToCaps( fromTable ), fromFields,
+                camelToCaps( toTable ), toFields );
+
+        table.addFN( fn );
+        
+        foreignKeyList.add( fn );
+
     }
 
     private boolean isNewLine( Token token ) {
 
         if ( token == null ) {
             return true;
-        }
-        else if ( token.isNewLine() ) {
+        } else if ( token.isNewLine() ) {
             return true;
         }
 
@@ -450,9 +511,9 @@ public class Parser {
         }
 
         caret.append( "^" );
-        throw new IllegalArgumentException( "\nError in file: " + fileName + " on line:" + tokenizer.getRow()
-                + " at col:" + tokenizer.getCol() + ".\n" + additionalMsg + "\n" + tokenizer.getLine() + " \n"
-                + caret.toString() );
+        throw new IllegalArgumentException( "\nError in file: " + fileName + " on line:"
+                + tokenizer.getRow() + " at col:" + tokenizer.getCol() + ".\n" + additionalMsg
+                + "\n" + tokenizer.getLine() + " \n" + caret.toString() );
     }
 
     private Token getNextToken() {
@@ -460,8 +521,7 @@ public class Parser {
 
         if ( token == null ) {
             return null;
-        }
-        else if ( token.isError() ) {
+        } else if ( token.isError() ) {
             throwException( "Input contains syntax error" );
         }
         return token;
@@ -483,8 +543,7 @@ public class Parser {
             Reader reader = new FileReader( file );
             br = new BufferedReader( reader );
 
-        }
-        catch ( FileNotFoundException e ) {
+        } catch ( FileNotFoundException e ) {
             throwException( "File: " + fileName + " not found." );
         }
 
@@ -548,6 +607,31 @@ public class Parser {
     }
 
     /**
+     * Takes a ALL_CAPS string with underscores separating words and converts it
+     * to camelCase.
+     * 
+     * @param capsString
+     * @return
+     */
+    public static String capsToCamel( String capsString ) {
+        StringBuilder sb = new StringBuilder();
+
+        capsString = capsString.toLowerCase();
+
+        char c;
+        for ( int i = 0; i < capsString.length(); i++ ) {
+            c = capsString.charAt( i );
+            if ( c == '_' ) {
+                sb.append( capsString.toUpperCase().charAt( i + 1 ) );
+                i++;
+            } else {
+                sb.append( c );
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
      * @return the tableMap which accumulates all the tables that were parsed.
      */
     public static HashMap<String, Table> getTableMap() {
@@ -559,5 +643,9 @@ public class Parser {
      */
     public static ArrayList<ForeignNode> getForeignKeyList() {
         return foreignKeyList;
+    }
+
+    public static ArrayList<LinkNode> getLinkList() {
+        return linkList;
     }
 }

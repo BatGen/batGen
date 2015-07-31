@@ -119,7 +119,22 @@ public class Tokenizer {
                 checkPos();
                 return t;
             }
-
+            
+            if ( isArrowStart( String.valueOf( line.charAt( pos ) ) ) ) {
+                increment();
+                
+                if (isArrowEnd(String.valueOf( line.charAt( pos ) ) ) ) {
+                    t.setValue( "=>" );
+                    t.setType(Type.ARROW);
+                    increment();
+                } else {
+                    t.setType( Type.ERROR );
+                }
+                
+                checkPos();
+                return t;
+            }
+            
             if ( isSpace( String.valueOf( line.charAt( pos ) ) ) ) {
                 readSpace();
                 checkPos();
@@ -153,6 +168,14 @@ public class Tokenizer {
             e.printStackTrace();
         }
     }
+    
+    private boolean isArrowStart(String s) {
+        return ( "=".equals( s ));
+    }
+    
+    private boolean isArrowEnd(String s) {
+        return ( ">".equals( s ));
+    }
 
     private boolean isComment( String s ) {
         return ( "/".equals( s ) );
@@ -164,7 +187,7 @@ public class Tokenizer {
 
     private boolean isWord( String s ) {
         return ( !"/".equals( s ) && !SPECIAL.contains( s ) && !SPACE
-                .contains( s ) );
+                .contains( s ) && !"=".equals( s ) );
     }
 
     private boolean isSpecial( String s ) {

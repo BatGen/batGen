@@ -25,9 +25,6 @@ package org.batgen.generators;
 
 import static org.batgen.generators.GenUtil.writeToFile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.batgen.Column;
 import org.batgen.IndexNode;
 import org.batgen.Table;
@@ -37,22 +34,18 @@ import org.batgen.Table;
  * 
  */
 public class BoGenerator extends Generator {
-    String        boName  = "";
-    StringBuilder sb      = new StringBuilder();
-    final String  NEWLINE = "\n";
-    private List<Column> keyColumns = new ArrayList<Column>();
-    String        filePath;
+    String boName = "";
+    StringBuilder sb = new StringBuilder();
+
+    String filePath;
+
+    final String NEWLINE = "\n";
+    private final String IMPORT_DATE = "import java.util.Date;";
 
     public BoGenerator( Table table ) {
         super( table );
         boName = table.getDomName() + "Bo";
         filePath = "src/main/java/" + packageToPath() + "/bo/" + boName + ".java";
-
-        for ( Column column : table.getColumns() ) {
-            if ( column.isKey() ) {
-                keyColumns.add(column);
-            }
-        }
     }
 
     public String createBo() {
@@ -60,6 +53,7 @@ public class BoGenerator extends Generator {
         writeImport();
         writeClass();
         writeList();
+        writeManyManyJoin();
         sb.append( getProtectedJavaLines( filePath ) );
         writeToFile( filePath, sb.toString() );
         createBoException();
@@ -104,10 +98,10 @@ public class BoGenerator extends Generator {
         write( table.getDomName() );
         write( " value ) throws BoException {\n" );
         writeMethodBodyCreateUpdate( "update" );
-        
+
         String param = "";
-        for(Column col : keyColumns){
-        	param += col.getFldType() + " " + col.getFldName() + ", ";
+        for ( Column col : table.getKeyColumns() ) {
+            param += col.getFldType() + " " + col.getFldName() + ", ";
         }
         param = param.substring( 0, param.length() - 2 );
 
@@ -121,13 +115,14 @@ public class BoGenerator extends Generator {
         write( TAB );
         write( "public " );
         write( table.getDomName() );
-        write( " read( " + param);;
+        write( " read( " + param );
+        ;
         write( " ) throws BoException {\n" );
         writeMethodBodyReadDelete( "read" );
         write( NEWLINE );
 
         if ( !table.getIndexList().isEmpty() ) {
-        	writeIndexKeys();
+            writeIndexKeys();
         }
 
     }
@@ -157,16 +152,26 @@ public class BoGenerator extends Generator {
         write( TAB + TAB + "return result;\n" );
         write( TAB + "}\n" );
     }
-    
+
     private void writeMethodBodyReadDelete( String type ) {
         String mapperName = table.getDomName() + "Dao";
         write( TAB + TAB + "SqlSession session = null;\n" );
 
         if ( type.equalsIgnoreCase( "read" ) ) {
             write( TAB + TAB + table.getDomName() + " result;\n" );
-        }
-        else {
+        } else {
             write( TAB + TAB + "int result = 0;\n" );
+        }
+
+        write( NEWLINE );
+
+        write( TAB + TAB + table.getDomName() + " param = new " + table.getDomName() + "();"
+                + NEWLINE + NEWLINE );
+
+        for ( Column col : table.getKeyColumns() ) {
+            String paramCamel = col.getFldName().substring( 0, 1 ).toUpperCase()
+                    + col.getFldName().substring( 1 );
+            write( TAB + TAB + "param.set" + paramCamel + "( " + col.getFldName() + " );" + NEWLINE );
         }
 
         write( NEWLINE );
@@ -176,14 +181,10 @@ public class BoGenerator extends Generator {
         write( TAB + TAB + TAB + mapperName );
         write( " mapper = session.getMapper( " + mapperName + ".class );\n" );
         write( TAB + TAB + TAB + "result = mapper." + type + "( " );
-        
-        String param = "";
-        for(Column col : keyColumns){
-        	param += col.getFldName() + ", ";
-        }
-        param = param.substring( 0, param.length() - 2 );
-        write( param + " );\n" );
-        
+        write( "param );" );
+
+        write( NEWLINE );
+
         write( TAB + TAB + TAB + "session.commit();\n\n" );
 
         write( TAB + TAB + "} catch ( Exception e ) {\n" );
@@ -203,13 +204,13 @@ public class BoGenerator extends Generator {
         StringBuilder sb = new StringBuilder();
 
         for ( IndexNode node : table.getIndexList() ) {
-        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
+            String methodName = "readByIndex" + toTitleCase( node.getIndexName() );
             String param = "";
-            for(Column col : node.getColumnList()){
-            	param += col.getFldType() + " " + col.getFldName() + ", ";
+            for ( Column col : node.getColumnList() ) {
+                param += col.getFldType() + " " + col.getFldName() + ", ";
             }
             param = param.substring( 0, param.length() - 2 );
-            sb.append( TAB + "public " + table.getDomName() + " " + methodName + "( "  );
+            sb.append( TAB + "public " + table.getDomName() + " " + methodName + "( " );
             sb.append( param + " ) throws BoException" );
             sb.append( "{\n" );
 
@@ -221,11 +222,11 @@ public class BoGenerator extends Generator {
             sb.append( TAB + TAB + TAB + mapperName );
             sb.append( " mapper = session.getMapper( " + mapperName + ".class );\n" );
             param = "";
-            for(Column col : node.getColumnList()){
-            	param += col.getFldName() + ", ";
+            for ( Column col : node.getColumnList() ) {
+                param += col.getFldName() + ", ";
             }
             param = param.substring( 0, param.length() - 2 );
-            sb.append( TAB + TAB + TAB + "result = mapper." + methodName +"( " + param + " );\n" );
+            sb.append( TAB + TAB + TAB + "result = mapper." + methodName + "( " + param + " );\n" );
             sb.append( TAB + TAB + TAB + "session.commit();\n\n" );
             sb.append( TAB + TAB + "} catch ( Exception e ) {\n" );
             sb.append( TAB + TAB + TAB + "session.rollback();\n" );
@@ -287,13 +288,162 @@ public class BoGenerator extends Generator {
         }
     }
 
+    /**
+     * Generate the getTable1ListByTable2Key and getTable2ListByTable1Key BO
+     * methods for the many-to-many link tables
+     */
+    private void writeManyManyJoin() {
+
+        if ( !table.isManyToMany() )
+            return;
+
+        String mapperName = table.getDomName() + "Dao";
+
+        Table one = table.getTableOne();
+        Table two = table.getTableTwo();
+
+        // First join method - getTable2ListByTable1Key
+
+        write( TAB );
+        write( "public " );
+        write( "List<" + two.getDomName() + "> get" );
+        write( two.getDomName() + "ListBy" + one.getDomName() + "Key");
+        write( "( " );
+
+        String param = "";
+        for ( Column col : table.getTableOne().getKeyColumns() ) {
+            param += col.getFldType() + " " + col.getFldName() + ", ";
+        }
+        param = param.substring( 0, param.length() - 2 );
+        sb.append( param );
+
+        write( " ) throws BoException {\n" );
+
+        write( TAB + TAB + "SqlSession session = null;\n" );
+        write( TAB + TAB + "List<" + two.getDomName() + "> list;\n\n" );
+
+        write( TAB + TAB + one.getDomName() + " param = new " + one.getDomName() + "();"
+                + NEWLINE + NEWLINE );
+
+        for ( Column col : one.getKeyColumns() ) {
+            String paramCamel = col.getFldName().substring( 0, 1 ).toUpperCase()
+                    + col.getFldName().substring( 1 );
+            write( TAB + TAB + "param.set" + paramCamel + "( " + col.getFldName() + " );" + NEWLINE );
+        }
+        
+        write( NEWLINE );
+        
+        write( TAB + TAB + "try {\n" );
+        write( TAB + TAB + TAB + "session = SessionFactory.getSession();\n" );
+
+        write( TAB + TAB + TAB + mapperName );
+        write( " mapper = session.getMapper( " + mapperName + ".class );\n" );
+        write( TAB + TAB + TAB + "list = mapper.get" );
+        sb.append( two.getDomName() );
+        sb.append( "ListBy" );
+        sb.append( one.getDomName() + "Key" );
+        write( "( " );
+
+        write ( "param" );
+
+        write( " );\n" );
+        write( TAB + TAB + TAB + "session.commit();\n\n" );
+
+        write( TAB + TAB + "} catch ( Exception e ) {\n" );
+        write( TAB + TAB + TAB + "session.rollback();\n" );
+        write( TAB + TAB + TAB + "throw new BoException( e );\n\n" );
+
+        write( TAB + TAB + "} finally { \n" );
+        write( TAB + TAB + TAB + "if ( session != null )\n" );
+        write( TAB + TAB + TAB + TAB + "session.close();\n" );
+        write( TAB + TAB + "}\n\n" );
+        write( TAB + TAB + "return list;\n" );
+        write( TAB + "}\n\n" );
+
+        // Second join method - getTable1ListByTable2Key
+
+        write( TAB );
+        write( "public " );
+        write( "List<" + one.getDomName() + "> get" );
+        write( one.getDomName() + "ListBy" + two.getDomName() + "Key" );
+        write( "( " );
+
+        param = "";
+        for ( Column col : table.getTableTwo().getKeyColumns() ) {
+            param += col.getFldType() + " " + col.getFldName() + ", ";
+        }
+        param = param.substring( 0, param.length() - 2 );
+        sb.append( param );
+
+        write( " ) throws BoException {\n" );
+
+        write( TAB + TAB + "SqlSession session = null;\n" );
+        write( TAB + TAB + "List<" + one.getDomName() + "> list;\n\n" );
+
+        write( TAB + TAB + two.getDomName() + " param = new " + two.getDomName() + "();"
+                + NEWLINE + NEWLINE );
+
+        for ( Column col : two.getKeyColumns() ) {
+            String paramCamel = col.getFldName().substring( 0, 1 ).toUpperCase()
+                    + col.getFldName().substring( 1 );
+            write( TAB + TAB + "param.set" + paramCamel + "( " + col.getFldName() + " );" + NEWLINE );
+        }
+        
+        write( NEWLINE );
+        
+        write( TAB + TAB + "try {\n" );
+        write( TAB + TAB + TAB + "session = SessionFactory.getSession();\n" );
+
+        write( TAB + TAB + TAB + mapperName );
+        write( " mapper = session.getMapper( " + mapperName + ".class );\n" );
+        write( TAB + TAB + TAB + "list = mapper.get" );
+        sb.append( one.getDomName() );
+        sb.append( "ListBy" );
+        sb.append( two.getDomName() + "Key" );
+        write( "( " );
+
+        write ( "param" );
+
+        write( " );\n" );
+        write( TAB + TAB + TAB + "session.commit();\n\n" );
+
+        write( TAB + TAB + "} catch ( Exception e ) {\n" );
+        write( TAB + TAB + TAB + "session.rollback();\n" );
+        write( TAB + TAB + TAB + "throw new BoException( e );\n\n" );
+
+        write( TAB + TAB + "} finally { \n" );
+        write( TAB + TAB + TAB + "if ( session != null )\n" );
+        write( TAB + TAB + TAB + TAB + "session.close();\n" );
+        write( TAB + TAB + "}\n\n" );
+        write( TAB + TAB + "return list;\n" );
+        write( TAB + "}\n\n" );
+
+    }
+
     private void writeImport() {
         ImportGenerator imports = new ImportGenerator( filePath );
-        if ( hasSearch )
+        if ( hasSearch || hasJoin )
             imports.addImport( "import java.util.List;" );
+
+        boolean date = false;
+        for ( Column col : table.getColumns() ) {
+            if ( col.getFldType().equals( "Date" ) ) {
+                date = true;
+            }
+        }
+        if ( date ) {
+            imports.addImport( IMPORT_DATE );
+        }
+
         imports.addImport( "import org.apache.ibatis.session.*;" );
         imports.addImport( "import " + table.getPackage() + ".dao.*;" );
-        imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
+        if ( hasJoin ) {
+            imports.addImport( "import " + table.getPackage() + ".domain.*;" );
+        } else {
+            imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName()
+                    + ";" );
+        }
+
         imports.addImport( "import " + table.getPackage() + ".util." + "BoException;" );
 
         write( imports.toString() );
