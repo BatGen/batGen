@@ -39,7 +39,7 @@ public class DatabaseEnvironment {
     private String TAB = "    ";
 
     private static final String[] h2Parameters = { "H2", "org.h2.Driver",
-            "jdbc:h2:tcp://localhost:9096/sample/testDB", "POOLED", "", "JDBC" };
+            "jdbc:h2:mem:test", "POOLED", "", "JDBC" };
 
 
     private static final String[] oracleParameters = { "ORACLE",
@@ -222,15 +222,12 @@ public class DatabaseEnvironment {
 
     /**
      * This method returns standard initial login information
-     * 
-     * @param username
-     * @param password
      */
     private String createLoginInfo() {
 
         return TAB + TAB + TAB + TAB
                 + "<property name=\"username\" value=\"sa\" />\n" + TAB + TAB
-                + TAB + TAB + "<property name=\"password\" value=\"123\" />\n";
+                + TAB + TAB + "<property name=\"password\" value=\"\" />\n";
 
     }
 

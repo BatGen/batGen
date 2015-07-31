@@ -37,16 +37,15 @@ import org.batgen.Table;
  * Generates a basic set of DAO classes.
  */
 public class DaoGenerator extends Generator {
-    private Table         table;
-    private String        daoName = "";
-    
-    private StringBuilder sb      = new StringBuilder();
-    private String        filePath;
-    private List<Column> keyColumns = new ArrayList<Column>();
-    
-    private final String  TAB     = "    ";
-    private final String  IMPORT_DATE = "import java.util.Date;";
+    private Table table;
+    private String daoName = "";
 
+    private StringBuilder sb = new StringBuilder();
+    private String filePath;
+    private List<Column> keyColumns = new ArrayList<Column>();
+
+    private final String TAB = "    ";
+    private final String IMPORT_DATE = "import java.util.Date;";
 
     public DaoGenerator( Table table ) {
         super( table );
@@ -55,13 +54,13 @@ public class DaoGenerator extends Generator {
         filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName + ".java";
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
-                keyColumns.add(column);
+                keyColumns.add( column );
             }
         }
     }
 
     public String createDao() {
-    	
+
         writePkg();
         writeImport();
         writeInterface();
@@ -84,10 +83,11 @@ public class DaoGenerator extends Generator {
             sb.append( "package " + table.getPackage() + ".util;\n" + "\n"
                     + "public class DaoException extends Exception {\n" + TAB + "\n" + TAB
                     + "private static final long serialVersionUID = 1L;\n" + "\n" + TAB
-                    + "public DaoException(Throwable e) {\n" + TAB + TAB + "super(e);\n" + TAB + "}\n" + "\n" + TAB
-                    + "public DaoException(String msg) {\n" + TAB + TAB + "super(msg);\n" + TAB + "}\n" + "\n" + TAB
-                    + "public DaoException(String msg, Throwable e) {\n" + TAB + TAB + "super(msg, e);\n" + TAB + "}\n"
-                    + "\n\n" );
+                    + "public DaoException(Throwable e) {\n" + TAB + TAB + "super(e);\n" + TAB
+                    + "}\n" + "\n" + TAB + "public DaoException(String msg) {\n" + TAB + TAB
+                    + "super(msg);\n" + TAB + "}\n" + "\n" + TAB
+                    + "public DaoException(String msg, Throwable e) {\n" + TAB + TAB
+                    + "super(msg, e);\n" + TAB + "}\n" + "\n\n" );
             sb.append( getProtectedJavaLines( filePath ) );
             writeToFile( filePath, sb.toString() );
         }
@@ -96,20 +96,25 @@ public class DaoGenerator extends Generator {
 
     private void writeImport() {
         ImportGenerator imports = new ImportGenerator( filePath );
-        if ( hasSearch )
+        if ( hasSearch || hasJoin )
             imports.addImport( "import java.util.List;" );
-        
+
         boolean date = false;
         for ( Column col : table.getColumns() ) {
-        	if (col.getFldType().equals( "Date" )) {
-        		date = true;
-        	}
+            if ( col.getFldType().equals( "Date" ) ) {
+                date = true;
+            }
         }
-        if (date) {
-        	imports.addImport(IMPORT_DATE);
+        if ( date ) {
+            imports.addImport( IMPORT_DATE );
         }
-        
-        imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
+
+        if ( hasJoin ) {
+            imports.addImport( "import " + table.getPackage() + ".domain.*;" );
+        } else {
+            imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName()
+                    + ";" );
+        }
         imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
         imports.addImport( "import org.apache.ibatis.annotations.Param;" );
 
@@ -127,26 +132,57 @@ public class DaoGenerator extends Generator {
         write( " value ) throws DaoException;\n\n" );
         write( TAB + "public int update( " + table.getDomName() );
         write( " value ) throws DaoException;\n\n" );
-        
-        String param = "";
-        for(Column col : keyColumns){
-        	param += "@Param( \"" + col.getFldName() + "\" ) " + col.getFldType() + " " + col.getFldName() + ", ";
-        }
-        param = param.substring( 0, param.length() - 2 );
-        
+
+        String param = table.getDomName() + " param";
         write( TAB + "public int delete( " + param + " ) throws DaoException;\n\n" );
-        write( TAB + "public " + table.getDomName() + " read( " + param + " ) throws DaoException;\n\n" );
-        
-        for ( IndexNode node : table.getIndexList() ) {
-        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
-            param = "";
-            for(Column col : node.getColumnList()){
-            	param += "@Param( \"" + col.getFldName() + "\" ) " + col.getFldType() + " " + col.getFldName() + ", ";
-            }
-            param = param.substring( 0, param.length() - 2 );
-            
-            write( TAB + "public " + table.getDomName() + " " + methodName + "( " + param + " ) throws DaoException;\n\n" );
+        write( TAB + "public " + table.getDomName() + " read( " + param
+                + " ) throws DaoException;\n\n" );
+
+        if ( table.isManyToMany() ) {
+            writeManyToMany();
         }
+
+        for ( IndexNode node : table.getIndexList() ) {
+            String methodName = "readByIndex" + toTitleCase( node.getIndexName() );
+
+            write( TAB + "public " + table.getDomName() + " " + methodName + "( " + param
+                    + " ) throws DaoException;\n\n" );
+        }
+
+    }
+
+    /** 
+     * Generate the getTable1ListByTable2Key and getTable2ListByTable1Key
+     * DAO methods for the many-to-many link tables
+     */
+    private void writeManyToMany() {
+
+        Table one = table.getTableOne();
+        Table two = table.getTableTwo();
+
+        String param = two.getDomName() + " param";
+        
+        write( TAB + "public " );
+        write( "List<" + one.getDomName() + "> get" );
+        sb.append( one.getDomName() );
+        sb.append( "ListBy" );
+        sb.append( two.getDomName() + "Key" );
+        write( "( " );
+        write( param );
+        write( " ) throws DaoException;\n" );
+
+        write( "\n" );
+
+        param = one.getDomName() + " param";
+        
+        write( TAB + "public " );
+        write( "List<" + two.getDomName() + "> get" );
+        sb.append( two.getDomName() );
+        sb.append( "ListBy" );
+        sb.append( one.getDomName() + "Key" );
+        write( "( " );
+        write( param );
+        write( " ) throws DaoException;\n" );
         
     }
 
@@ -160,6 +196,7 @@ public class DaoGenerator extends Generator {
                 write( column.getFldType() );
                 write( " key ) throws DaoException;\n" );
             }
+
         }
         write( "\n" );
     }

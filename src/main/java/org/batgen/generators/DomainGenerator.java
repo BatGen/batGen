@@ -191,6 +191,7 @@ public class DomainGenerator extends Generator {
 
         return str.toString();
     }
+    
 
     public void skipLine() {
         sb.append( "\n\n" );

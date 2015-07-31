@@ -48,6 +48,7 @@ public class Generator {
     protected final List<Column> columns;
     protected final List<String> searchList;
     protected final boolean      hasSearch;
+    protected final boolean      hasJoin;
 
     public Generator( Table table ) {
         this.table = table;
@@ -58,6 +59,7 @@ public class Generator {
         tableName = table.getTableName();
         columns = table.getColumns();
         hasSearch = table.hasSearch();
+        hasJoin = true;
     }
 
     /**

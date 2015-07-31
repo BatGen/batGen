@@ -34,18 +34,17 @@ import org.batgen.IndexNode;
 import org.batgen.Table;
 
 public class XmlGenerator extends Generator {
-    public static String     NEWLINE           = "\n";
+    public static String NEWLINE = "\n";
 
-    private static final int columnSpace       = 45;
-    private List<String>     sqlVariables      = null;
-    private List<String>     javaVariables     = null;
-    private List<Column>     searchableColumns = null;
-    private List<Column>     keyColumns        = new ArrayList<Column>();
+    private static final int columnSpace = 45;
+    private List<String> sqlVariables = null;
+    private List<String> javaVariables = null;
+    private List<Column> searchableColumns = null;
+    private List<Column> keyColumns = new ArrayList<Column>();
 
-
-    private String           daoName           = "";
-    private String           filePath;
-    private DatabaseType     databaseType;
+    private String daoName = "";
+    private String filePath;
+    private DatabaseType databaseType;
 
     public XmlGenerator( Table table, DatabaseType databaseType ) {
         super( table );
@@ -55,7 +54,7 @@ public class XmlGenerator extends Generator {
         filePath = filePath.replace( "_", "" );
         for ( Column column : table.getColumns() ) {
             if ( column.isKey() ) {
-                keyColumns.add(column);
+                keyColumns.add( column );
             }
         }
     }
@@ -74,6 +73,7 @@ public class XmlGenerator extends Generator {
         sb.append( createGetListBy() );
         sb.append( createUpdate() );
         sb.append( createDelete() );
+        sb.append( createManyToMany() );
         sb.append( createIndex() );
         sb.append( getProtectedJavaLines( filePath ) );
 
@@ -81,6 +81,9 @@ public class XmlGenerator extends Generator {
         return filePath;
     }
 
+    /**
+     * Generate the heading of the XML mapper
+     */
     private String createHeading() {
         StringBuilder sb = new StringBuilder();
 
@@ -91,28 +94,32 @@ public class XmlGenerator extends Generator {
         return sb.toString();
     }
 
+    /**
+     * Generate the the resultMap for the current object
+     */
     private String createCol() {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
 
-        sb.append( "<mapper namespace=\"" + table.getPackage() + ".dao." + table.getDomName() + "Dao\">\n" );
-        sb.append( "\n" + TAB + "<resultMap id=\"" + table.getDomName() + "Mapper\" type=\"" + table.getPackage()
-                + ".domain." + table.getDomName() + "\">" );
+        sb.append( "<mapper namespace=\"" + table.getPackage() + ".dao." + table.getDomName()
+                + "Dao\">\n" );
+        sb.append( "\n" + TAB + "<resultMap id=\"" + table.getDomName() + "Mapper\" type=\""
+                + table.getPackage() + ".domain." + table.getDomName() + "\">" );
 
         for ( int i = 0; i < table.getColumns().size(); i++ ) {
             StringBuilder string = new StringBuilder();
 
-            string.append( TAB + TAB + "<result column =\"" + table.getColumn( i ).getColName().toUpperCase() + "\" " );
+            string.append( TAB + TAB + "<result column =\""
+                    + table.getColumn( i ).getColName().toUpperCase() + "\" " );
             string.append( makeSpace( columnSpace, string.toString() ) );
             string.append( "property = \"" + table.getColumn( i ).getFldName() + "\" />" );
             if ( !table.getColumn( i ).getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
                 sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
-                if( table.getColumn( i ).isSysTimestamp() ){
-                	javaVariables.add( "systimestamp" );
-                }
-                else{
-                	javaVariables.add( table.getColumn( i ).getFldName() );
+                if ( table.getColumn( i ).isSysTimestamp() ) {
+                    javaVariables.add( "systimestamp" );
+                } else {
+                    javaVariables.add( table.getColumn( i ).getFldName() );
                 }
             }
 
@@ -128,27 +135,34 @@ public class XmlGenerator extends Generator {
         return sb.toString();
     }
 
+    /**
+     * Generate the mapped SELECT statement by primary key
+     */
     private String createRead() {
         String param = "";
-        for(Column col : keyColumns){
-        	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+        for ( Column col : keyColumns ) {
+            param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
         }
         param = param.substring( 0, param.length() - 5 );
-        
+
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
         sb.append( "\n" );
 
-        sb.append( TAB + "<select id=\"read\" parameterType=\"map\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
-        
-        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n");
-        sb.append( TAB + TAB + "where " + param + "\n");
+        sb.append( TAB + "<select id=\"read\" parameterType=\"" + table.getPackage() + ".domain."
+                + table.getDomName() + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
+
+        sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" );
+        sb.append( TAB + TAB + "where " + param + "\n" );
         sb.append( TAB + "</select>\n" );
 
         return sb.toString();
     }
 
+    /**
+     * Generate the mapped INSERT statement
+     */
     private String createInsert() {
         StringBuilder sb = new StringBuilder();
 
@@ -159,10 +173,10 @@ public class XmlGenerator extends Generator {
         // if the 1st column does not have: sequence disabled, and (string and
         // key)
 
-        if ( !table.getColumn( 0 ).isSequenceDisabled()
-                && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
-            sb.append( TAB + TAB + "<selectKey resultType=\"_" + table.getColumn( 0 ).getFldType().toLowerCase()
-                    + "\" keyProperty=\"" + table.getColumn( 0 ).getFldName() + "\" order=\"BEFORE\">\n" );
+        if ( sequenceDisabled() ) {
+            sb.append( TAB + TAB + "<selectKey resultType=\"_"
+                    + table.getColumn( 0 ).getFldType().toLowerCase() + "\" keyProperty=\""
+                    + table.getColumn( 0 ).getFldName() + "\" order=\"BEFORE\">\n" );
             switch ( databaseType ) {
             case H2:
             case ORACLE:
@@ -180,8 +194,8 @@ public class XmlGenerator extends Generator {
 
         sb.append( TAB + TAB + "insert into " + table.getTableName().toUpperCase() + "\n" );
         sb.append( TAB + TAB + "(\n" );
-        sb.append( TAB + TAB + TAB + getVariablesList() + "\n" + TAB + TAB + ")\n" + TAB + TAB + "values\n" + TAB + TAB
-                + "(\n" );
+        sb.append( TAB + TAB + TAB + getVariablesList() + "\n" + TAB + TAB + ")\n" + TAB + TAB
+                + "values\n" + TAB + TAB + "(\n" );
         sb.append( TAB + TAB + TAB + getjavaList() + "\n" );
         sb.append( TAB + TAB + ")\n" );
         sb.append( TAB + "</insert>\n" );
@@ -189,6 +203,9 @@ public class XmlGenerator extends Generator {
         return sb.toString();
     }
 
+    /**
+     * Generate the getListByField() XML for fields marked as a searchable ID
+     */
     private String createGetListBy() {
         StringBuilder sb = new StringBuilder();
 
@@ -223,27 +240,33 @@ public class XmlGenerator extends Generator {
             }
 
             sb.append( TAB );
-            sb.append( "</select>" );
-
+            sb.append( "</select>\n" );
         }
-        sb.append( "\n" );
 
         return sb.toString();
     }
 
+    /**
+     * Generate the mapped UPDATE statement
+     */
     private String createUpdate() {
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
-        sb.append( "\n" + TAB + "<update id=\"update\" parameterType=\"" + table.getPackage() + ".domain."
-                + table.getDomName() + "\">\n" );
+        sb.append( "\n" + TAB + "<update id=\"update\" parameterType=\"" + table.getPackage()
+                + ".domain." + table.getDomName() + "\">\n" );
         sb.append( TAB + TAB + "update " + table.getTableName().toUpperCase() + " set\n" );
         sb.append( getCombinedList() + "\n" );
 
         switch ( databaseType ) {
         case H2:
         case ORACLE:
-            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
+            String param = TAB + TAB + "where ";
+            for ( Column c : keyColumns ) {
+                param += c.getColName() + " = #{" + c.getFldName() + "} AND ";
+            }
+            param = param.substring( 0, param.length() - 5 );
+            sb.append( param + "\n" );
         }
 
         sb.append( TAB + "</update>" );
@@ -251,17 +274,21 @@ public class XmlGenerator extends Generator {
         return sb.toString();
     }
 
+    /**
+     * Generate the mapped DELETE statement
+     */
     private String createDelete() {
         String param = "";
-        for(Column col : keyColumns){
-        	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+        for ( Column col : keyColumns ) {
+            param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
         }
         param = param.substring( 0, param.length() - 5 );
-        
+
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
-        sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\"map\">\n");
+        sb.append( "\n" + TAB + "<delete id=\"delete\" parameterType=\"" + table.getPackage()
+                + ".domain." + table.getDomName() + "\">\n" );
 
         sb.append( TAB + TAB + "delete from " + table.getTableName().toUpperCase() + "\n" );
         sb.append( TAB + TAB + "where " + param + "\n" );
@@ -269,27 +296,143 @@ public class XmlGenerator extends Generator {
 
         return sb.toString();
     }
-    
-    private String createIndex(){
+
+    /**
+     * Generate the getTable1ListByTable2Key and getTable2ListByTable1Key XML
+     * for the many-to-many link tables
+     */
+    private String createManyToMany() {
+        StringBuilder sb = new StringBuilder();
+        // only generate the XML mapping for many-to-many tables
+        if ( table.isManyToMany() ) {
+            sb.append( "\n" );
+
+            // obtain references to the tables being linked
+            Table one = table.getTableOne();
+            Table two = table.getTableTwo();
+
+            // First join method - getTable2ListByTable1Key
+
+            // Generate the ON clause for the inner join part of the SQL query
+            String onClause = "";
+            for ( Column col : two.getColumns() ) {
+                if ( col.isKey() ) {
+                    onClause += two.getTableName() + "_" + col.getColName() + " = "
+                            + col.getColName() + " AND ";
+                }
+            }
+            onClause = onClause.substring( 0, onClause.length() - 4 );
+
+            // Generate the WHERE clause of the SQL query
+            String whereClause = "";
+            for ( Column col : one.getColumns() ) {
+                if ( col.isKey() ) {
+                    whereClause += one.getTableName() + "_" + col.getColName() + " = #{"
+                            + col.getFldName() + "} AND ";
+                }
+            }
+            whereClause = whereClause.substring( 0, whereClause.length() - 5 );
+
+            sb.append( "\n" );
+            sb.append( TAB );
+            sb.append( "<select id=\"get" + two.getDomName() + "ListBy" + one.getDomName() + "Key" );
+            sb.append( "\" parameterType=\"" + table.getPackage()
+                    + ".domain." + table.getDomName() + "\" resultMap=\"" );
+            // Use the resultMap of the corresponding object being returned
+            sb.append( table.getPackage() + ".dao." + two.getDomName() + "Dao." + two.getDomName() );
+            sb.append( "Mapper\">\n" );
+            sb.append( TAB );
+            sb.append( TAB );
+            sb.append( "select * from " );
+            sb.append( table.getTableName() );
+            sb.append( " inner join " );
+            sb.append( two.getTableName() );
+            sb.append( " on " + onClause );
+            sb.append( "\n" );
+            sb.append( TAB );
+            sb.append( TAB );
+            sb.append( TAB + TAB + "where " + whereClause + "\n" );
+            sb.append( TAB );
+            sb.append( "</select>" );
+
+            // Second join method - getTable1ListByTable2Key
+
+            // Generate the ON clause for the inner join part of the SQL query
+            onClause = "";
+            for ( Column col : one.getColumns() ) {
+                if ( col.isKey() ) {
+                    onClause += one.getTableName() + "_" + col.getColName() + " = "
+                            + col.getColName() + " AND ";
+                }
+            }
+            onClause = onClause.substring( 0, onClause.length() - 4 );
+
+            // Generate the WHERE clause of the SQL query
+            whereClause = "";
+            for ( Column col : two.getColumns() ) {
+                if ( col.isKey() ) {
+                    whereClause += two.getTableName() + "_" + col.getColName() + " = #{"
+                            + col.getFldName() + "} AND ";
+                }
+            }
+            whereClause = whereClause.substring( 0, whereClause.length() - 5 );
+
+            sb.append( "\n" );
+            sb.append( "\n" );
+            sb.append( TAB );
+            sb.append( "<select id=\"get" );
+            sb.append( one.getDomName() + "ListBy" + two.getDomName() + "Key" );
+            sb.append( "\" parameterType=\"" + table.getPackage()
+                    + ".domain." + table.getDomName() + "\" resultMap=\"" );
+            // Use the resultMap of the corresponding object being returned
+            sb.append( table.getPackage() + ".dao." + one.getDomName() + "Dao." + one.getDomName() );
+            sb.append( "Mapper\">\n" );
+            sb.append( TAB );
+            sb.append( TAB );
+            sb.append( "select * from " );
+            sb.append( table.getTableName() );
+            sb.append( " inner join " );
+            sb.append( one.getTableName() );
+            sb.append( " on " + onClause );
+            sb.append( "\n" );
+            sb.append( TAB );
+            sb.append( TAB );
+            sb.append( TAB + TAB + "where " + whereClause + "\n" );
+            sb.append( TAB );
+            sb.append( "</select>" );
+            sb.append( "\n" );
+
+        }
+
+        return sb.toString();
+
+    }
+
+    /**
+     * Generate the mapped SELECT statement by the (optional) compound indexes
+     */
+    private String createIndex() {
         StringBuilder sb = new StringBuilder();
 
         for ( IndexNode node : table.getIndexList() ) {
-        	String methodName = "readByIndex" + toTitleCase( node.getIndexName());
+            String methodName = "readByIndex" + toTitleCase( node.getIndexName() );
             String param = "";
-            for(Column col : node.getColumnList()){
-            	param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+            for ( Column col : node.getColumnList() ) {
+                param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
             }
             param = param.substring( 0, param.length() - 5 );
 
             sb.append( "\n" );
             sb.append( "\n" );
 
-            sb.append( TAB + "<select id=\"" + methodName + " \" parameterType=\"map\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
-            
-            sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n");
-            sb.append( TAB + TAB + "where " + param + "\n");
+            sb.append( TAB + "<select id=\"" + methodName
+                    + " \" parameterType=\"" + table.getPackage()
+                    + ".domain." + table.getDomName() + "\" resultMap=\"" + table.getDomName() + "Mapper\">\n" );
+
+            sb.append( TAB + TAB + "select * from " + table.getTableName().toUpperCase() + "\n" );
+            sb.append( TAB + TAB + "where " + param + "\n" );
             sb.append( TAB + "</select>\n" );
-            }
+        }
         return sb.toString();
     }
 
@@ -320,13 +463,12 @@ public class XmlGenerator extends Generator {
             if ( i % 5 == 0 && i != 0 ) {
                 list.append( "\n" + TAB + TAB + TAB );
             }
-            if( javaVariables.get( i ).equals("systimestamp")){
-            	list.append( javaVariables.get( i ) );
-            }
-            else{
-            	list.append( "#{" );
-            	list.append( javaVariables.get( i ) );
-            	list.append( "}" );
+            if ( javaVariables.get( i ).equals( "systimestamp" ) ) {
+                list.append( javaVariables.get( i ) );
+            } else {
+                list.append( "#{" );
+                list.append( javaVariables.get( i ) );
+                list.append( "}" );
             }
 
             if ( i != javaVariables.size() - 1 ) {
@@ -350,11 +492,10 @@ public class XmlGenerator extends Generator {
             }
 
             list.append( makeSpace( 35, list.toString() ) );
-            if( javaVariables.get( i ).equals("systimestamp")) {
-            	list.append( "= " + javaVariables.get( i ) + "" );
-            }
-            else {
-            	list.append( "= #{" + javaVariables.get( i ) + "}" );
+            if ( javaVariables.get( i ).equals( "systimestamp" ) ) {
+                list.append( "= " + javaVariables.get( i ) + "" );
+            } else {
+                list.append( "= #{" + javaVariables.get( i ) + "}" );
             }
             if ( i != javaVariables.size() - 1 ) {
                 list.append( " ," );
@@ -372,5 +513,14 @@ public class XmlGenerator extends Generator {
         line = line.substring( 0, 1 ).toUpperCase() + line.substring( 1 );
 
         return line;
+
     }
+
+    private boolean sequenceDisabled() {
+        return ( !table.getColumn( 0 ).isSequenceDisabled()
+                && !table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" )
+                && table.getColumn( 0 ).isKey() && !table.isManyToMany() );
+
+    }
+
 }

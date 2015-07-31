@@ -39,11 +39,11 @@ import org.batgen.VirtualStringColumn;
 
 public class SqlGenerator extends Generator {
 
-    private final int       SPACE     = 18;
-    private String          filePath;
+    private final int SPACE = 18;
+    private String filePath;
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
-    private List<String>    keyList   = new ArrayList<String>();
-    private boolean         buildSequence;
+    private List<String> keyList = new ArrayList<String>();
+    private boolean buildSequence;
 
     public SqlGenerator( Table table ) {
         super( table );
@@ -67,7 +67,6 @@ public class SqlGenerator extends Generator {
         writeToFile( filePath, sb.toString() );
 
         GenUtil.appendToFile( "sql/_CreateTables.sql", table );
-        writeDropsFile();
 
         return filePath;
     }
@@ -79,35 +78,33 @@ public class SqlGenerator extends Generator {
         for ( Column column : table.getColumns() ) {
 
             String name = column.getClass().getSimpleName();
-            sb.append( "    " + column.getColName().toUpperCase() + makeSpace( SPACE, column.getColName() ) );
+            sb.append( "    " + column.getColName().toUpperCase()
+                    + makeSpace( SPACE, column.getColName() ) );
 
             if ( name.equals( "BlobColumn" ) ) {
-                BlobColumn c = (BlobColumn) column;
+                BlobColumn c = ( BlobColumn ) column;
                 sb.append( column.getSqlType() );
                 if ( c.getColLen() != null )
                     sb.append( "(" + c.getColLen() + ")" );
 
-            }
-            else if ( name.equals( "LengthColumn" ) ) {
-                LengthColumn c = (LengthColumn) column;
+            } else if ( name.equals( "LengthColumn" ) ) {
+                LengthColumn c = ( LengthColumn ) column;
                 if ( c.getColLen() != null ) {
                     sb.append( column.getSqlType() + "(" + c.getColLen() + ")" );
                 }
-            }
-            else if ( name.equals( "DoubleColumn" ) ) {
-                DoubleColumn c = (DoubleColumn) column;
+            } else if ( name.equals( "DoubleColumn" ) ) {
+                DoubleColumn c = ( DoubleColumn ) column;
                 if ( c.getColLen() != null ) {
-                    sb.append( column.getSqlType() + "("
-                            + ( Integer.parseInt( c.getColLen() ) + Integer.parseInt( c.getPrecision() ) ) + ","
-                            + c.getPrecision() + ")" );
+                    sb.append( column.getSqlType()
+                            + "("
+                            + ( Integer.parseInt( c.getColLen() ) + Integer.parseInt( c
+                                    .getPrecision() ) ) + "," + c.getPrecision() + ")" );
                 }
-            }
-            else if ( name.equals( "Column" ) ) {
+            } else if ( name.equals( "Column" ) ) {
                 Column c = column;
                 sb.append( c.getSqlType() );
-            }
-            else if ( name.equals( "VirtualStringColumn" ) ) {
-                VirtualStringColumn c = (VirtualStringColumn) column;
+            } else if ( name.equals( "VirtualStringColumn" ) ) {
+                VirtualStringColumn c = ( VirtualStringColumn ) column;
                 sb.append( column.getSqlType() + "(" + c.getColLen() + ") as (" );
                 sb.append( c.getSqlCommand() + ")" );
             }
@@ -144,15 +141,55 @@ public class SqlGenerator extends Generator {
         indexList = table.getIndexList();
         for ( IndexNode node : indexList ) {
             String param = "";
-            for(Column col : node.getColumnList()){
-            	param += col.getColName() + ", ";
+            for ( Column col : node.getColumnList() ) {
+                param += col.getColName() + ", ";
             }
             param = param.substring( 0, param.length() - 2 );
-            
+
             sb.append( "\nCREATE INDEX " + node.getIndexName() );
             sb.append( " ON " + table.getTableName() + "( " + param + " );" );
 
         }
+
+        // index for primary key(s)
+        String param = "";
+        for ( Column col : table.getColumns() ) {
+            if ( col.isKey() ) {
+                param += col.getColName() + ", ";
+            }
+        }
+        param = param.substring( 0, param.length() - 2 );
+
+        sb.append( "\nCREATE INDEX " + table.getTableName() + "_PK" );
+        sb.append( " ON " + table.getTableName() + "( " + param + " );" );
+
+        if ( table.isManyToMany() ) {
+            Table one = table.getTableOne();
+            Table two = table.getTableTwo();
+
+            param = "";
+            for ( Column col : one.getColumns() ) {
+                if ( col.isKey() ) {
+                    param += one.getTableName() + "_" + col.getColName() + ", ";
+                }
+            }
+            param = param.substring( 0, param.length() - 2 );
+
+            sb.append( "\nCREATE INDEX " + table.getTableName() + "_" + one.getTableName() );
+            sb.append( " ON " + table.getTableName() + "( " + param + " );" );
+
+            param = "";
+            for ( Column col : two.getColumns() ) {
+                if ( col.isKey() ) {
+                    param += two.getTableName() + "_" +col.getColName() + ", ";
+                }
+            }
+            param = param.substring( 0, param.length() - 2 );
+
+            sb.append( "\nCREATE INDEX " + table.getTableName() + "_" + two.getTableName() );
+            sb.append( " ON " + table.getTableName() + "( " + param + " );" );
+        }
+
         sb.append( "\n" );
         return sb.toString();
     }
@@ -170,15 +207,11 @@ public class SqlGenerator extends Generator {
         sb.deleteCharAt( sb.length() - 2 );
         if ( keyList.isEmpty() ) {
             sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    KEY = 0;\n" );
-        }
-        else {
-            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    " + keyList.get( 0 ) + " = 0;\n" );
+        } else {
+            sb.append( "\nfrom " + table.getTableName() + "\nWHERE\n    " + keyList.get( 0 )
+                    + " = 0;\n" );
         }
         return sb.toString();
-    }
-
-    private void writeDropsFile() {
-        GenUtil.appendToFile( "sql/_DropTables.sql", drop() + "\n" );
     }
 
     private String drop() {
@@ -203,10 +236,9 @@ public class SqlGenerator extends Generator {
     }
 
     private boolean sequenceDisabled() {
-        if ( !table.getColumn( 0 ).isSequenceDisabled()
-                && ( !( table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" ) && table.getColumn( 0 ).isKey() ) ) ) {
-            return true;
-        }
-        return false;
+        return ( !table.getColumn( 0 ).isSequenceDisabled()
+                && !table.getColumn( 0 ).getFldType().equalsIgnoreCase( "string" )
+                && table.getColumn( 0 ).isKey() && !table.isManyToMany() );
+
     }
 }

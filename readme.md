@@ -18,15 +18,24 @@ The tables used are formatted in an acceptable manner for the application to cre
    1. Generally the comment section is used to define what the table name is called.
    2. Comments here can be defined by a multi-line comment (starting with /* and ending with */) or a single line comment (//).
 2. The second section is Settings.
-   1. The keyword Settings must be surrounded by brackets ( [ ] ). Within the settings it contains the keywords class.
-   3. CLASS specifies the name of the table (java) and the database name (sql) (The database name is not required).
+   1. The keyword Settings must be surrounded by brackets ( [ ] ). The settings contain keywords CLASS, EXTENDS, and LINK.
+   2. CLASS <Class name> <Database Name>
+   			Specifies the name of the table (java) and the database name (sql) (The database name is not required). Each file must specify a class.
+   3. EXTENDS <Superclass name>
+   		 	Specifies a class name for the generated domain object to extend. If the superclass name is in a different package than the domain object, specify the full package name and it will be imported also. 
+   4. LINK <Class one> <Class two> 
+   		 	Allows automatic generation of many-to-many link tables. In addition to everything else specified in this file, the following additions will be automatically generated.
+   		 		A field for every primary key in class one.
+   		 		A field for every primary key in class two.
+   		 		A Bo method, get<Class One>By<Class Two>Key(...) which takes one argument for each primary key in <Class Two>.
+   		 		A Bo method, get<Class Two>By<Class One>Key(...) which takes two argument for each primary key in <Class One>.
 3. The third section is Fields.
    1. The keyword Fields must be surrounded by brackets ( [ ] ).
    2. The field section contains all the columns related to that table.
    3. The data type is on the left, followed by the name of the column (camelCase), the database alias name (not required),special character (not required), and a comment (not required)
       * The applicable data types are: long, integer, double, string, blob, date, timestamp and boolean.
       * If the data type is an long, integer, or string, then you must also specify a magnitude  (total number of digits).
-      * If the data type is an double, then you must also specify a interger part (number of digits to the left of the decimal point) and precision (number of digits to the right of the decimal point).
+      * If the data type is an double, then you must also specify a integer part (number of digits to the left of the decimal point) and precision (number of digits to the right of the decimal point).
       * If the data type is an timestamp then you must also specify a precision (precision of the seconds ).
       * If the data type is an vstring, then you must also specify a magnitude (total number of digits) and also a comment section with the sql-statement on how to retrieve it surrounded by `. 
    4. The special characters that are allowed are !, *, ? and -.
@@ -40,9 +49,13 @@ The tables used are formatted in an acceptable manner for the application to cre
     3. Requires at least two inputs: the index name, and all the columns names(second column in the txt file) separated by commas.
 
 5. The fifth section is Foreign Keys (Optional).
-    1. The keyword ForeignKeys must be surrounded by brackets ( [ ] ).
+    1. The keyword ForeignKeys must be surrounded by brackets ( [ ] )
     2. Use to create references to a column from another table
-    3. Requires three inputs: the column name(second column in the txt file), the word 'constrainsTo', and the other table name.other column name
+	3. Compound foreign keys are accepted
+    4. Follows the following syntax: First the column names in the current table that are referencing fields from other tables. Next the symbol '=>' denotes where the fields will be pointing to. And finally the table that is being referenced followed by the fields being referenced in parenthesis. The fields can be comma separated or space separated. Take a look at the following examples. the following examples.
+  		* Example: first, last => Employee(first_name, last_name) 
+  		* Example: first last => Employee(first_name last_name)
+  		* Example: id => User(id)
 
 EXAMPLE TABLE FILE: (employee.txt)
 ```
@@ -64,5 +77,6 @@ EXAMPLE TABLE FILE: (employee.txt)
     name     lastName, firstName
 
     [ForeignKeys]
-    supervisorKey constrainsTo Supervisor.supervisorKey
+    supervisorKey => Supervisor(supervisorKey)
+    firstName, lastName => Names(first, last)
 ```
