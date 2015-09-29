@@ -35,7 +35,9 @@ public class ForeignKeyGenerator {
         String fromField = "";
         String toField = "";
 
-        for ( ForeignNode node : foreignNodeList ) {
+        ForeignNode node;
+        for ( int keyNum = 0; keyNum < foreignNodeList.size(); keyNum++ ) {
+            node = foreignNodeList.get( keyNum );
             fromTable = tableMap.get( node.getFromTable() );
             toTable = tableMap.get( node.getToTable() );
             fromFieldExist = false;
@@ -59,9 +61,9 @@ public class ForeignKeyGenerator {
 
                 if ( fromFieldExist && toFieldExist ) {
                     sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                    sb.append( " ADD CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField );
-                    sb.append( " FOREIGN KEY (" + fromField + ") " );
-                    sb.append( "REFERENCES " + toTable.getTableName() + "(" + toField + ");\n" );
+                    sb.append( " ADD CONSTRAINT FK_" + fromTable.getTableName() + "_" + keyNum );
+                    sb.append( " FOREIGN KEY (" + fromField + ")" );
+                    sb.append( " REFERENCES " + toTable.getTableName() + "(" + toField + ");\n" );
                 }
                 else
                     throw new IllegalArgumentException( "In Table" + node.getFromTable() + " and/or "
