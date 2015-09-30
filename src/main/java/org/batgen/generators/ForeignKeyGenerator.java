@@ -87,25 +87,14 @@ public class ForeignKeyGenerator {
 
     private String writeDropForeignKeys() {
         StringBuilder sb = new StringBuilder();
-        boolean fromFieldExist = false;
         Table fromTable;
-        String fromField = "";
 
-        for ( ForeignNode node : foreignNodeList ) {
+        ForeignNode node;
+        for ( int keyNum = 0; keyNum < foreignNodeList.size(); keyNum++ ) {
+            node = foreignNodeList.get( keyNum );
             fromTable = tableMap.get( node.getFromTable() );
-            fromFieldExist = false;
-            for ( Column col : fromTable.getColumns() ) {
-                if ( col.getFldName().equals( node.getFromField() ) ) {
-                    fromFieldExist = true;
-                    fromField = col.getColName();
-                    break;
-                }
-            }
-
-            if ( fromFieldExist ) {
-                sb.append( "ALTER TABLE " + fromTable.getTableName() );
-                sb.append( " DROP CONSTRAINT FK_" + fromTable.getTableName() + "_" + fromField + ";\n" );
-            }
+            sb.append( "ALTER TABLE " + fromTable.getTableName() );
+            sb.append( " DROP CONSTRAINT FK_" + fromTable.getTableName() + "_" + keyNum + ";\n" );
         }
         return sb.toString();
     }
