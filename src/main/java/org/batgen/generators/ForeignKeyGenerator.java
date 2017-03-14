@@ -9,6 +9,8 @@ import org.batgen.ForeignNode;
 import org.batgen.Table;
 
 public class ForeignKeyGenerator {
+    private static final String PREFIX = "src/test/resources/sql/";
+    
     private ArrayList<ForeignNode> foreignNodeList;
     private HashMap<String, Table> tableMap;
 
@@ -20,10 +22,10 @@ public class ForeignKeyGenerator {
     public void createForeignKeys() {
         StringBuilder sb = new StringBuilder();
         sb.append( writeAddForeignKeys() );
-        GenUtil.writeToFile( "sql/_AlterTables.sql", sb.toString() );
+        GenUtil.writeToFile( PREFIX + "_AlterTables.sql", sb.toString() );
         sb = new StringBuilder();
         sb.append( writeDropForeignKeys() );
-        GenUtil.appendToFile( "sql/_DropTables.sql", sb.toString() );
+        GenUtil.appendToFile( PREFIX + "_DropTables.sql", sb.toString() );
     }
 
     private String writeAddForeignKeys() {
@@ -75,7 +77,7 @@ public class ForeignKeyGenerator {
         }
 
         sb.append( "\n-- PROTECTED CODE -->" );
-        List<String> lines = GenUtil.getProtectedLines( "sql/_AlterTables.sql" );
+        List<String> lines = GenUtil.getProtectedLines( PREFIX + "_AlterTables.sql" );
         if ( lines.isEmpty() ) {
             sb.append( "\n" );
         }

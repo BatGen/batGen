@@ -41,6 +41,8 @@ public class DatabaseEnvironment {
     private static final String[] h2Parameters = { "H2", "org.h2.Driver",
             "jdbc:h2:tcp://localhost:9096/sample/testDB", "POOLED", "", "JDBC" };
 
+    private static final String[] testParameters = { "H2", "org.h2.Driver",
+            "jdbc:h2:mem:;INIT=RUNSCRIPT FROM 'classpath:sql/_CreateTables.sql';", "POOLED", "", "JDBC" };
 
     private static final String[] oracleParameters = { "ORACLE",
             "oracle.jdbc.OracleDriver",
@@ -83,7 +85,7 @@ public class DatabaseEnvironment {
         String[] dbEnvironment = null;
 
         if ( "H2".equalsIgnoreCase( environment ) ) {
-            temp = h2Parameters;
+            temp = testParameters;
         }
         
         else if ( "ORACLE".equalsIgnoreCase( environment ) ) {
