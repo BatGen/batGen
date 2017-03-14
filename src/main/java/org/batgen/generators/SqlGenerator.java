@@ -39,6 +39,8 @@ import org.batgen.VirtualStringColumn;
 
 public class SqlGenerator extends Generator {
 
+    private static final String PREFIX = "src/test/resources/sql/";
+
     private final int       SPACE     = 18;
     private String          filePath;
     private List<IndexNode> indexList = new ArrayList<IndexNode>();
@@ -48,7 +50,7 @@ public class SqlGenerator extends Generator {
     public SqlGenerator( Table table ) {
         super( table );
 
-        filePath = "sql/" + table.getTableName() + ".sql";
+        filePath = PREFIX + table.getTableName() + ".sql";
     }
 
     public String createSql() {
@@ -66,7 +68,7 @@ public class SqlGenerator extends Generator {
 
         writeToFile( filePath, sb.toString() );
 
-        GenUtil.appendToFile( "sql/_CreateTables.sql", table );
+        GenUtil.appendToFile( PREFIX + "_CreateTables.sql", table );
         writeDropsFile();
 
         return filePath;
@@ -178,7 +180,7 @@ public class SqlGenerator extends Generator {
     }
 
     private void writeDropsFile() {
-        GenUtil.appendToFile( "sql/_DropTables.sql", drop() + "\n" );
+        GenUtil.appendToFile( PREFIX + "_DropTables.sql", drop() + "\n" );
     }
 
     private String drop() {
