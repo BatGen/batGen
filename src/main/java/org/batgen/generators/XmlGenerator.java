@@ -232,6 +232,12 @@ public class XmlGenerator extends Generator {
     }
 
     private String createUpdate() {
+        String param = "";
+        for(Column col : keyColumns){
+            param += col.getColName() + " = #{" + col.getFldName() + "} AND ";
+        }
+        param = param.substring( 0, param.length() - 5 );
+         
         StringBuilder sb = new StringBuilder();
 
         sb.append( "\n" );
@@ -243,7 +249,7 @@ public class XmlGenerator extends Generator {
         switch ( databaseType ) {
         case H2:
         case ORACLE:
-            sb.append( TAB + TAB + "where " + sqlVariables.get( 0 ) + " = #{" + javaVariables.get( 0 ) + "}\n" );
+            sb.append( TAB + TAB + "where " + param + "\n" );
         }
 
         sb.append( TAB + "</update>" );
