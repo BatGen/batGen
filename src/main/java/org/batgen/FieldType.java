@@ -10,7 +10,7 @@ public enum FieldType {
     INTEGER ( "INTEGER", "int",     "Integer",   "NUMBER" ),
     LONG    ( "LONG",    "long",    "Long",      "NUMBER" ),
     DOUBLE  ( "DOUBLE",  "double",  "Double",    "NUMBER" ),
-    BOOLEAN ( "BOOLEAN", "boolean", "Boolean",   "NUMBER" ),
+    BOOLEAN ( "BOOLEAN", "boolean", "Boolean",   "CHAR" ),
     DATE    ( "DATE",    "Date",    "Date",      "DATE" ),
     BLOB    ( "BLOB",    "byte[]",  "byte[]",    "BLOB" ),
     CLOB    ( "CLOB",    "String",  "String",    "CLOB" ),

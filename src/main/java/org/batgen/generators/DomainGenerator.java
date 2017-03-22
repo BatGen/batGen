@@ -37,6 +37,10 @@ public class DomainGenerator extends Generator {
     private StringBuilder sb          = new StringBuilder();
     private StringBuilder flds        = new StringBuilder();
     private StringBuilder getsSets    = new StringBuilder();
+    
+    private StringBuilder stringFlds      = new StringBuilder();
+    private StringBuilder stringAccessors = new StringBuilder();
+    
     boolean               date;
 
     private final int     FLD_SPACE   = 9;
@@ -55,6 +59,7 @@ public class DomainGenerator extends Generator {
         date = false;
         for ( Column col : table.getColumns() ) {
             writeColFields( col );
+            writeStringFields( col );
             getsSets.append( writeGet( col ) );
             getsSets.append( writeSet( col ) );
 
@@ -73,7 +78,20 @@ public class DomainGenerator extends Generator {
 
         sb.append( flds );
         sb.append( "\n" );
+        
+        if ( stringFlds.length() > 0 ) {
+            sb.append( "    // Helper fields for comparison routine.\n" );
+            sb.append( stringFlds );
+        }
+        
+        sb.append( "\n" );
         sb.append( getsSets );
+        
+        if ( stringFlds.length() > 0 ) {
+            sb.append( "\n    // Helper accessors for comparison routine.\n" );
+            sb.append( stringAccessors );
+            
+        }
 
         sb.append( getProtectedJavaLines( filePath ) );
         writeToFile( filePath, sb.toString() );
@@ -131,6 +149,55 @@ public class DomainGenerator extends Generator {
         flds.append( "\n" );
     }
 
+    private void writeStringFields( Column col ) {
+        if ( !col.getType().equals( FieldType.LONG ) ) return;
+        
+        stringFlds.append( SPACE );
+        stringFlds.append( "private " );
+
+        String fldType = "String";
+
+        stringFlds.append( fldType );
+        stringFlds.append( makeSpace( FLD_SPACE, fldType ) );
+
+        stringFlds.append( col.getFldName() );
+        stringFlds.append( "Str;" );
+
+        if ( col.getComments() != null ) {
+            stringFlds.append( makeSpace( 20, col.getFldName() ) );
+            stringFlds.append( col.getComments() );
+        }
+
+        stringFlds.append( "\n" );
+
+        // Establish String Accessors
+        StringBuilder str = stringAccessors;
+
+        // Write Getter
+        str.append( SPACE );
+        str.append( "public " );
+        str.append( "String" );
+        str.append( makeSpace( PUB_SPACE, "String" ) );
+
+        str.append( "get" );
+        str.append( toTitleCase( col.getFldName() ) );
+        str.append( "Str() { return " );
+        str.append( col.getFldName() );
+        str.append( "Str; }\n" );
+        
+        // Write Setter
+        str.append( SPACE );
+        str.append( "public void      " );
+        str.append( "set" );
+
+        str.append( toTitleCase( col.getFldName() ) );
+        str.append( "Str( " );
+        str.append( "String" );
+        str.append( " value ) { " );
+        str.append( col.getFldName() );
+        str.append( "Str = value; }\n" );
+    }
+    
     private String writeSet( Column col ) {
         if ( col.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
             return "";
