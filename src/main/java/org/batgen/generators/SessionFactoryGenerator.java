@@ -45,6 +45,11 @@ public class SessionFactoryGenerator {
     }
 
     public String createSession() {
+        
+        if ( fileExists( fileName ) ) {
+            return fileName + " already exists, not generated.";
+        }
+        
         sb = new StringBuilder();
 
         sb.append( createPackage() );

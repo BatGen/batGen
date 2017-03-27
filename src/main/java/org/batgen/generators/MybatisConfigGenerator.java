@@ -23,6 +23,8 @@
  */
 package org.batgen.generators;
 
+import static org.batgen.generators.GenUtil.fileExists;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -76,6 +78,11 @@ public class MybatisConfigGenerator {
      * to file.
      */
     public String createConfiguration() {
+        
+        if ( fileExists( fileNameWithPath ) ) {
+            return fileNameWithPath + " already exists, not generated.";
+        }
+        
         sb = new StringBuilder();
 
         createHeader();

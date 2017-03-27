@@ -21,6 +21,11 @@ public class GenUtil {
         return "src/main/java/" + pkg.replace( ".", "/" );
     }
 
+    public static boolean fileExists( String fileName ) {
+        File file = new File( fileName );
+        return file.exists();
+    }
+    
     /**
      * Writes the content of the string to a specified file.
      * 

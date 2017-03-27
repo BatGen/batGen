@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.batgen.Column;
 import org.batgen.DatabaseType;
+import org.batgen.FieldType;
 import org.batgen.IndexNode;
 import org.batgen.Table;
 
@@ -100,26 +101,40 @@ public class XmlGenerator extends Generator {
         sb.append( "\n" + TAB + "<resultMap id=\"" + table.getDomName() + "Mapper\" type=\"" + table.getPackage()
                 + ".domain." + table.getDomName() + "\">" );
 
-        for ( int i = 0; i < table.getColumns().size(); i++ ) {
+        for ( Column column : table.getColumns() ) {
             StringBuilder string = new StringBuilder();
 
-            string.append( TAB + TAB + "<result column =\"" + table.getColumn( i ).getColName().toUpperCase() + "\" " );
-            string.append( makeSpace( columnSpace, string.toString() ) );
-            string.append( "property = \"" + table.getColumn( i ).getFldName() + "\" />" );
-            if ( !table.getColumn( i ).getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
-                sqlVariables.add( table.getColumn( i ).getColName().toUpperCase() );
-                if( table.getColumn( i ).isSysTimestamp() ){
+            string.append( TAB )
+                  .append( TAB )
+                  .append( "<result column =\"" )
+                  .append( column.getColName().toUpperCase() )
+                  .append( "\" " )
+                  .append( makeSpace( columnSpace, string.toString() ) )
+                  .append( "property = \"" )
+                  .append( column.getFldName() )
+                  .append( "\"" );
+            
+            if ( column.getType() == FieldType.BOOLEAN ) {
+                string.append( " javaType=\"Boolean\" jdbcType=\"CHAR\"" );
+            }
+            
+            string.append( " />" );
+            
+            
+            if ( !column.getClass().getSimpleName().equals( "VirtualStringColumn" ) ) {
+                sqlVariables.add( column.getColName().toUpperCase() );
+                if( column.isSysTimestamp() ){
                 	javaVariables.add( "systimestamp" );
                 }
                 else{
-                	javaVariables.add( table.getColumn( i ).getFldName() );
+                	javaVariables.add( column.getFldName() );
                 }
             }
 
             sb.append( "\n" + string.toString() );
 
-            if ( table.getColumn( i ).isSearchId() ) {
-                searchableColumns.add( table.getColumn( i ) );
+            if ( column.isSearchId() ) {
+                searchableColumns.add( column );
             }
         }
 
