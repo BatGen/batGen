@@ -212,9 +212,9 @@ public class DomainGenerator extends Generator {
         str.append( "( " );
 
         if ( col.getType() == FieldType.BOOLEAN ) {
-            str.append( "boolean value ) { " );
+            str.append( "Boolean value ) { " );
             str.append( col.getFldName() );
-            str.append( " = value ? true : false; }\n" );
+            str.append( " = value; }\n" );
 
         }
         else {

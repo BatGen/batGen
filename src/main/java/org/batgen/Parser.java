@@ -155,9 +155,17 @@ public class Parser {
                 return;
             table.setTableName( token.getValue() );
 
-        }
-        else {
-            throwException( "Unexpected token, expected CLASS" );
+        } else if ( token.equals( "PKG" ) ) {
+            token = getNextToken();
+
+            if ( isNewLine( token ) ) {
+                throwException( "Expected a package name, recieved new line." );
+            }
+          
+            table.setPackage( token.getValue() );            
+        
+        } else {
+            throwException( "Unexpected token, expected CLASS or PKG" );
         }
     }
 

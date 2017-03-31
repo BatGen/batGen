@@ -167,7 +167,9 @@ public class BatGen {
 
         for ( String file : files ) {
             table = parser.parse( file );
-            table.setPackage( basePkg );
+            if ( table.getPackage() == null || table.getPackage().isEmpty() )
+                table.setPackage( basePkg );
+            
             if ( classNames.contains( table.getDomName() ) ) {
                 throw new IllegalArgumentException( "This class name is used multiple times, " + table.getDomName() );
             }
@@ -223,10 +225,10 @@ public class BatGen {
         XmlGenerator xml = new XmlGenerator( table, databaseType );
         printPath( xml.createXml() );
 
-        BoGenerator bo = new BoGenerator( table );
+        BoGenerator bo = new BoGenerator( table, basePkg );
         printPath( bo.createBo() );
 
-        DaoGenerator dao = new DaoGenerator( table );
+        DaoGenerator dao = new DaoGenerator( table, basePkg );
         printPath( dao.createDao() );
 
         DomainGenerator domain = new DomainGenerator( table );
@@ -235,10 +237,10 @@ public class BatGen {
         SqlGenerator sql = new SqlGenerator( table );
         printPath( sql.createSql() );
 
-        TestDaoGenerator testDao = new TestDaoGenerator( table );
+        TestDaoGenerator testDao = new TestDaoGenerator( table, basePkg );
         printPath( testDao.createTestDao() );
 
-        TestBoGenerator testBo = new TestBoGenerator( table );
+        TestBoGenerator testBo = new TestBoGenerator( table, basePkg );
         printPath( testBo.createTestBo() );
 
     }

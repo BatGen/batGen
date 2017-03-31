@@ -41,7 +41,7 @@ public class SessionFactoryGenerator {
     public SessionFactoryGenerator( String pkg ) {
         this.pkg = pkg;
         pkgPath = packageToPath( pkg );
-        fileName = pkgPath + "/dao/SessionFactory.java";
+        fileName = pkgPath + "/SessionFactory.java";
     }
 
     public String createSession() {
@@ -85,7 +85,7 @@ public class SessionFactoryGenerator {
     private String createPackage() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "package " + pkg + ".dao" + ";" );
+        sb.append( "package " + pkg + ";" );
         sb.append( "\n\n" );
 
         return sb.toString();
@@ -115,7 +115,7 @@ public class SessionFactoryGenerator {
         String packagePath = pkgPath.replace( "src/main/java/", "" );
 
         sb.append( TAB + "private static String resource = \"" + packagePath
-                + "/dao/mybatis-config.xml\";\n" );
+                + "/mybatis-config.xml\";\n" );
 
         sb.append( "\n" + TAB + "private static void setup(){\n" );
         sb.append( TAB

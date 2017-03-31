@@ -34,10 +34,13 @@ public class TestBoGenerator extends Generator {
     private boolean getCreatedCalled = false;
     private String filePath;
     private String compoundKeys = "";
+    private String basePackage;
 
 
-    public TestBoGenerator( Table table ) {
+    public TestBoGenerator( Table table, String basePackage ) {
         super( table );
+        this.basePackage = basePackage;
+        
         this.daoName = "Test" + table.getDomName() + "Bo";
         filePath = "src/test/java/" + packageToPath() + "/bo/" + daoName
                 + ".java";
@@ -76,9 +79,10 @@ public class TestBoGenerator extends Generator {
             imports.addImport( "import java.util.List;" );
         }
 
+        imports.addImport( "import " + basePackage + ".SessionFactory;" );
+        imports.addImport( "import " + basePackage + ".util.*;" );
         imports.addImport( "import " + pkg + ".domain.*;" );
         imports.addImport( "import " + pkg + ".dao.*;" );
-        imports.addImport( "import " + pkg + ".util.*;" );
 
         return imports.toString();
     }

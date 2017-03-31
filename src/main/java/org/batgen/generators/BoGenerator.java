@@ -42,9 +42,11 @@ public class BoGenerator extends Generator {
     final String  NEWLINE = "\n";
     private List<Column> keyColumns = new ArrayList<Column>();
     String        filePath;
+    String        basePackage;
 
-    public BoGenerator( Table table ) {
+    public BoGenerator( Table table, String basePackage ) {
         super( table );
+        this.basePackage = basePackage;
         boName = table.getDomName() + "Bo";
         filePath = "src/main/java/" + packageToPath() + "/bo/" + boName + ".java";
 
@@ -292,9 +294,11 @@ public class BoGenerator extends Generator {
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
         imports.addImport( "import org.apache.ibatis.session.*;" );
+        
+        imports.addImport( "import " + basePackage + ".SessionFactory;" );
+        imports.addImport( "import " + basePackage + ".util." + "BoException;" );
         imports.addImport( "import " + table.getPackage() + ".dao.*;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
-        imports.addImport( "import " + table.getPackage() + ".util." + "BoException;" );
 
         write( imports.toString() );
 
@@ -302,10 +306,10 @@ public class BoGenerator extends Generator {
 
     private void createBoException() {
         sb = new StringBuilder();
-        String filePath = "src/main/java/" + packageToPath() + "/util/BoException.java";
+        String filePath = "src/main/java/" + basePackage.replace( ".", "/" ) + "/util/BoException.java";
 
         sb.append( "package " );
-        sb.append( table.getPackage() );
+        sb.append( basePackage );
         sb.append( ".util;\n\n" );
 
         sb.append( "public class BoException extends Exception {\n" );

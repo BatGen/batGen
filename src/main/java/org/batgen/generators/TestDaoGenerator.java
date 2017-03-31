@@ -37,11 +37,14 @@ public class TestDaoGenerator extends Generator {
     private String  daoName          = "";
     private boolean getCreatedCalled = false;
     private String  filePath;
-    private String param = "";
+    private String  param = "";
+    private String  basePackage;
 
 
-    public TestDaoGenerator( Table table ) {
+    public TestDaoGenerator( Table table, String basePackage ) {
         super( table );
+        this.basePackage = basePackage;
+        
         this.daoName = "Test" + table.getDomName() + "Dao";
         filePath = "src/test/java/" + packageToPath() + "/dao/" + daoName + ".java";
         
@@ -95,6 +98,7 @@ public class TestDaoGenerator extends Generator {
 
         imports.addImport( "import org.junit.*;" );
         imports.addImport( "import org.apache.ibatis.session.SqlSession;" );
+        imports.addImport( "import " + basePackage + ".SessionFactory;" );
         imports.addImport( "import " + pkg + ".domain.*;" );
 
         return imports.toString();

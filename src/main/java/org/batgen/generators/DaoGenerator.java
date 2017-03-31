@@ -43,11 +43,13 @@ public class DaoGenerator extends Generator {
     private StringBuilder sb      = new StringBuilder();
     private final String  TAB     = "    ";
     private String        filePath;
+    private String        basePackage;
     private List<Column> keyColumns = new ArrayList<Column>();
 
 
-    public DaoGenerator( Table table ) {
+    public DaoGenerator( Table table, String basePackage ) {
         super( table );
+        this.basePackage = basePackage;
         this.table = table;
         daoName = table.getDomName() + "Dao";
         filePath = "src/main/java/" + packageToPath() + "/dao/" + daoName + ".java";
@@ -74,11 +76,11 @@ public class DaoGenerator extends Generator {
     private void createDaoExceptions() {
 
         sb = new StringBuilder();
-        String filePath = "src/main/java/" + packageToPath() + "/util/DaoException.java";
+        String filePath = "src/main/java/" + basePackage.replace( ".", "/" ) + "/util/DaoException.java";
         File file = new File( filePath );
 
         if ( !file.exists() ) {
-            sb.append( "package " + table.getPackage() + ".util;\n" + "\n"
+            sb.append( "package " + basePackage + ".util;\n" + "\n"
                     + "public class DaoException extends Exception {\n" + TAB + "\n" + TAB
                     + "private static final long serialVersionUID = 1L;\n" + "\n" + TAB
                     + "public DaoException(Throwable e) {\n" + TAB + TAB + "super(e);\n" + TAB + "}\n" + "\n" + TAB
@@ -95,8 +97,10 @@ public class DaoGenerator extends Generator {
         ImportGenerator imports = new ImportGenerator( filePath );
         if ( hasSearch )
             imports.addImport( "import java.util.List;" );
+
+        imports.addImport( "import " + basePackage + ".SessionFactory;" );
+        imports.addImport( "import " + basePackage + ".util." + "DaoException;" );
         imports.addImport( "import " + table.getPackage() + ".domain." + table.getDomName() + ";" );
-        imports.addImport( "import " + table.getPackage() + ".util." + "DaoException;" );
         imports.addImport( "import org.apache.ibatis.annotations.Param;" );
 
         write( imports.toString() );

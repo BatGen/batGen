@@ -65,7 +65,7 @@ public class MybatisConfigGenerator {
         this.packagePath = packagePath;
         this.classNames = classNames;
         this.defaultEnvironment = databaseType.toString();
-        fileNameWithPath += packagePath + "/dao/mybatis-config.xml";
+        fileNameWithPath += packagePath + "/mybatis-config.xml";
         fileNameWithPath = fileNameWithPath.replace( ".", "/" );
         char[] path = fileNameWithPath.toCharArray();
         path[path.length - 4] = '.';
